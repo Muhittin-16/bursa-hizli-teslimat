@@ -1,1 +1,1066 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bursa Hızlı Teslimat - Yönetim Paneli</title>
 
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header h1 {
+            font-size: 21px;
+        }
+
+        #logoutBtn {
+            background: #dc2626;
+            color: white;
+            border: 0;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 18px;
+        }
+
+        .login-box,
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .login-box {
+            max-width: 430px;
+            margin: 70px auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .primary-btn {
+            width: 100%;
+            background: #16a34a;
+            color: white;
+            border: 0;
+            padding: 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .primary-btn:hover {
+            background: #15803d;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 28px;
+            margin-top: 8px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f9fafb;
+        }
+
+        .status-select {
+            min-width: 160px;
+        }
+
+        .price-input {
+            width: 110px;
+        }
+
+        .save-btn {
+            background: #2563eb;
+            color: white;
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .refresh-btn {
+            background: #111827;
+            color: white;
+            border: 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 800px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+
+            .panel,
+            .login-box {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚚 Bursa Hızlı Teslimat - Yönetim Paneli</h1>
+    <button id="logoutBtn" class="hidden">Çıkış Yap</button>
+</header>
+
+<main class="container">
+
+    <!-- GİRİŞ -->
+    <section id="loginSection" class="login-box">
+
+        <h2>🔐 Yönetici Girişi</h2>
+
+        <div class="form-group">
+            <label for="email">E-posta</label>
+            <input
+                type="email"
+                id="email"
+                placeholder="Yönetici e-postanız"
+                autocomplete="email"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="password">Şifre</label>
+            <input
+                type="password"
+                id="password"
+                placeholder="Şifreniz"
+                autocomplete="current-password"
+            >
+        </div>
+
+        <button id="loginBtn" class="primary-btn">
+            Giriş Yap
+        </button>
+
+        <div id="loginMessage" class="message"></div>
+
+    </section>
+
+
+    <!-- YÖNETİM PANELİ -->
+    <section id="dashboard" class="dashboard">
+
+        <div class="stats">
+
+            <div class="stat">
+                📦 Bekleyen
+                <strong id="bekleyenCount">0</strong>
+            </div>
+
+            <div class="stat">
+                ✅ Onaylanan
+                <strong id="onaylananCount">0</strong>
+            </div>
+
+            <div class="stat">
+                🚚 Yolda
+                <strong id="yoldaCount">0</strong>
+            </div>
+
+            <div class="stat">
+                🎯 Tamamlanan
+                <strong id="tamamlananCount">0</strong>
+            </div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <h2>📦 Teslimat Talepleri</h2>
+
+            <button id="refreshBtn" class="refresh-btn">
+                🔄 Talepleri Yenile
+            </button>
+
+            <div id="dashboardMessage" class="message"></div>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Sipariş No</th>
+                            <th>Tarih</th>
+                            <th>Müşteri</th>
+                            <th>Telefon</th>
+                            <th>Alış Adresi</th>
+                            <th>Teslimat Adresi</th>
+                            <th>Paket</th>
+                            <th>Aciliyet</th>
+                            <th>Durum</th>
+                            <th>Fiyat</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="ordersTableBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script type="module">
+
+    /*
+     * BURSA HIZLI TESLİMAT
+     * GERÇEK SUPABASE YÖNETİM PANELİ
+     */
+
+    import {
+        createClient
+    } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+
+    /* =====================================================
+       SUPABASE AYARLARI
+       ===================================================== */
+
+    const SUPABASE_URL =
+        "https://cwfkrwfvxurmtjkvllul.supabase.co";
+
+
+    const SUPABASE_PUBLISHABLE_KEY =
+        "BURAYA_PUBLISHABLE_KEY_YAPISTIR";
+
+
+    const supabase =
+        createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+
+    /* =====================================================
+       HTML ELEMANLARI
+       ===================================================== */
+
+    const loginSection =
+        document.getElementById("loginSection");
+
+    const dashboard =
+        document.getElementById("dashboard");
+
+    const loginBtn =
+        document.getElementById("loginBtn");
+
+    const logoutBtn =
+        document.getElementById("logoutBtn");
+
+    const refreshBtn =
+        document.getElementById("refreshBtn");
+
+    const emailInput =
+        document.getElementById("email");
+
+    const passwordInput =
+        document.getElementById("password");
+
+    const loginMessage =
+        document.getElementById("loginMessage");
+
+    const dashboardMessage =
+        document.getElementById("dashboardMessage");
+
+    const ordersTableBody =
+        document.getElementById("ordersTableBody");
+
+
+    /* =====================================================
+       MESAJ
+       ===================================================== */
+
+    function showMessage(element, text, type = "error") {
+
+        element.textContent = text;
+
+        element.className =
+            "message " + type;
+
+        element.style.display = "block";
+    }
+
+
+    function hideMessage(element) {
+
+        element.style.display = "none";
+
+    }
+
+
+    /* =====================================================
+       ADMİN KONTROLÜ
+       ===================================================== */
+
+    async function checkAdmin() {
+
+        const {
+            data: {
+                user
+            }
+        } = await supabase.auth.getUser();
+
+
+        if (!user) {
+
+            showLogin();
+
+            return false;
+
+        }
+
+
+        const {
+            data,
+            error
+        } = await supabase
+            .from("admin_kullanicilar")
+            .select("user_id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+
+        if (error) {
+
+            console.error(error);
+
+            showMessage(
+                loginMessage,
+                "Yönetici kontrolü sırasında hata oluştu."
+            );
+
+            return false;
+
+        }
+
+
+        if (!data) {
+
+            await supabase.auth.signOut();
+
+            showMessage(
+                loginMessage,
+                "Bu hesap yönetici olarak yetkilendirilmemiş."
+            );
+
+            showLogin();
+
+            return false;
+
+        }
+
+
+        showDashboard();
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       GİRİŞ
+       ===================================================== */
+
+    loginBtn.addEventListener(
+        "click",
+        async () => {
+
+            hideMessage(loginMessage);
+
+            const email =
+                emailInput.value.trim();
+
+            const password =
+                passwordInput.value;
+
+
+            if (!email || !password) {
+
+                showMessage(
+                    loginMessage,
+                    "E-posta ve şifre alanlarını doldurun."
+                );
+
+                return;
+
+            }
+
+
+            loginBtn.disabled = true;
+
+            loginBtn.textContent =
+                "Giriş yapılıyor...";
+
+
+            const {
+                error
+            } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+
+            loginBtn.disabled = false;
+
+            loginBtn.textContent =
+                "Giriş Yap";
+
+
+            if (error) {
+
+                showMessage(
+                    loginMessage,
+                    "Giriş başarısız: " +
+                    error.message
+                );
+
+                return;
+
+            }
+
+
+            await checkAdmin();
+
+        }
+    );
+
+
+    /* =====================================================
+       ÇIKIŞ
+       ===================================================== */
+
+    logoutBtn.addEventListener(
+        "click",
+        async () => {
+
+            await supabase.auth.signOut();
+
+            showLogin();
+
+        }
+    );
+
+
+    /* =====================================================
+       EKRANLAR
+       ===================================================== */
+
+    function showLogin() {
+
+        loginSection.style.display =
+            "block";
+
+        dashboard.style.display =
+            "none";
+
+        logoutBtn.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    function showDashboard() {
+
+        loginSection.style.display =
+            "none";
+
+        dashboard.style.display =
+            "block";
+
+        logoutBtn.classList.remove(
+            "hidden"
+        );
+
+        loadOrders();
+
+    }
+
+
+    /* =====================================================
+       TALEPLERİ GETİR
+       ===================================================== */
+
+    async function loadOrders() {
+
+        hideMessage(dashboardMessage);
+
+        ordersTableBody.innerHTML =
+            `<tr>
+                <td colspan="11">
+                    Yükleniyor...
+                </td>
+            </tr>`;
+
+
+        const {
+            data,
+            error
+        } = await supabase
+            .from("teslimat_talepleri")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+        if (error) {
+
+            console.error(error);
+
+            showMessage(
+                dashboardMessage,
+                "Teslimat talepleri alınamadı: " +
+                error.message
+            );
+
+            return;
+
+        }
+
+
+        updateStats(data || []);
+
+        renderOrders(data || []);
+
+    }
+
+
+    /* =====================================================
+       İSTATİSTİKLER
+       ===================================================== */
+
+    function updateStats(orders) {
+
+        const bekleyen =
+            orders.filter(
+                x => x.durum === "bekliyor"
+            ).length;
+
+
+        const onaylanan =
+            orders.filter(
+                x =>
+                    x.durum === "onaylandi" ||
+                    x.durum === "kurye_atandi"
+            ).length;
+
+
+        const yolda =
+            orders.filter(
+                x => x.durum === "yolda"
+            ).length;
+
+
+        const tamamlanan =
+            orders.filter(
+                x => x.durum === "teslim_edildi"
+            ).length;
+
+
+        document.getElementById(
+            "bekleyenCount"
+        ).textContent = bekleyen;
+
+
+        document.getElementById(
+            "onaylananCount"
+        ).textContent = onaylanan;
+
+
+        document.getElementById(
+            "yoldaCount"
+        ).textContent = yolda;
+
+
+        document.getElementById(
+            "tamamlananCount"
+        ).textContent = tamamlanan;
+
+    }
+
+
+    /* =====================================================
+       TABLO
+       ===================================================== */
+
+    function renderOrders(orders) {
+
+        if (!orders.length) {
+
+            ordersTableBody.innerHTML =
+                `<tr>
+                    <td colspan="11">
+                        Henüz teslimat talebi bulunmuyor.
+                    </td>
+                </tr>`;
+
+            return;
+
+        }
+
+
+        ordersTableBody.innerHTML =
+            orders.map(order => {
+
+                const date =
+                    order.created_at
+                        ? new Date(
+                            order.created_at
+                        ).toLocaleString(
+                            "tr-TR"
+                        )
+                        : "-";
+
+
+                const price =
+                    order.fiyat !== null &&
+                    order.fiyat !== undefined
+                        ? Number(order.fiyat)
+                        : "";
+
+
+                return `
+                    <tr>
+
+                        <td>
+                            <strong>
+                                ${escapeHtml(
+                                    order.siparis_no || "-"
+                                )}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(date)}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                order.ad_soyad || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                order.telefon || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                order.alis_adresi || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                order.teslimat_adresi || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                order.paket_tipi || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                order.aciliyet || "-"
+                            )}
+                        </td>
+
+                        <td>
+
+                            <select
+                                class="status-select"
+                                data-id="${order.id}"
+                            >
+
+                                ${statusOption(
+                                    "bekliyor",
+                                    "Bekliyor",
+                                    order.durum
+                                )}
+
+                                ${statusOption(
+                                    "onaylandi",
+                                    "Onaylandı",
+                                    order.durum
+                                )}
+
+                                ${statusOption(
+                                    "kurye_atandi",
+                                    "Kurye Atandı",
+                                    order.durum
+                                )}
+
+                                ${statusOption(
+                                    "yolda",
+                                    "Yolda",
+                                    order.durum
+                                )}
+
+                                ${statusOption(
+                                    "teslim_edildi",
+                                    "Teslim Edildi",
+                                    order.durum
+                                )}
+
+                                ${statusOption(
+                                    "iptal",
+                                    "İptal",
+                                    order.durum
+                                )}
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="price-input"
+                                data-price-id="${order.id}"
+                                value="${price}"
+                                placeholder="₺"
+                            >
+
+                        </td>
+
+                        <td>
+
+                            <button
+                                class="save-btn"
+                                data-save-id="${order.id}"
+                            >
+                                Kaydet
+                            </button>
+
+                        </td>
+
+                    </tr>
+                `;
+
+            }).join("");
+
+
+        document
+            .querySelectorAll("[data-save-id]")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => saveOrder(button.dataset.saveId)
+                );
+
+            });
+
+    }
+
+
+    function statusOption(
+        value,
+        text,
+        current
+    ) {
+
+        return `
+            <option
+                value="${value}"
+                ${value === current ? "selected" : ""}
+            >
+                ${text}
+            </option>
+        `;
+
+    }
+
+
+    /* =====================================================
+       SİPARİŞ KAYDET
+       ===================================================== */
+
+    async function saveOrder(id) {
+
+        const statusElement =
+            document.querySelector(
+                `.status-select[data-id="${id}"]`
+            );
+
+
+        const priceElement =
+            document.querySelector(
+                `.price-input[data-price-id="${id}"]`
+            );
+
+
+        const durum =
+            statusElement.value;
+
+
+        const rawPrice =
+            priceElement.value.trim();
+
+
+        let fiyat = null;
+
+
+        if (rawPrice !== "") {
+
+            fiyat =
+                Number(
+                    rawPrice.replace(",", ".")
+                );
+
+
+            if (
+                Number.isNaN(fiyat) ||
+                fiyat < 0
+            ) {
+
+                alert(
+                    "Geçerli bir fiyat girin."
+                );
+
+                return;
+
+            }
+
+        }
+
+
+        const {
+            error
+        } = await supabase
+            .from("teslimat_talepleri")
+            .update({
+                durum,
+                fiyat
+            })
+            .eq("id", id);
+
+
+        if (error) {
+
+            console.error(error);
+
+            alert(
+                "Kaydetme hatası: " +
+                error.message
+            );
+
+            return;
+
+        }
+
+
+        alert(
+            "Sipariş başarıyla güncellendi."
+        );
+
+
+        loadOrders();
+
+    }
+
+
+    /* =====================================================
+       XSS KORUMASI
+       ===================================================== */
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+    /* =====================================================
+       YENİLE
+       ===================================================== */
+
+    refreshBtn.addEventListener(
+        "click",
+        loadOrders
+    );
+
+
+    /* =====================================================
+       OTURUM DEĞİŞİKLİĞİ
+       ===================================================== */
+
+    supabase.auth.onAuthStateChange(
+        async (event) => {
+
+            if (event === "SIGNED_OUT") {
+
+                showLogin();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       SAYFA AÇILINCA
+       ===================================================== */
+
+    checkAdmin();
+
+</script>
+
+</body>
+</html>
