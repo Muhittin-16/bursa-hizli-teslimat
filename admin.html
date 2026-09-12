@@ -1,1 +1,2644 @@
-<!DOCTYPE html> <html lang="tr"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Bursa Hızlı Teslimat - Yönetim Paneli</title> <style> *{ box-sizing:border-box; margin:0; padding:0; } body{ font-family:Arial,Helvetica,sans-serif; background:#f3f6fa; color:#172033; min-height:100vh; } button{ cursor:pointer; font-family:inherit; } .hidden{ display:none!important; } /* ========================= HEADER ========================= */ header{ background:#111827; color:white; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; gap:15px; box-shadow:0 3px 15px rgba(0,0,0,.12); } header h1{ font-size:21px; } .header-actions{ display:flex; gap:8px; flex-wrap:wrap; } .header-btn{ border:0; border-radius:8px; padding:10px 14px; font-weight:bold; color:white; } .sound-btn{ background:#2563eb; } .sound-btn.off{ background:#6b7280; } .logout-btn{ background:#dc2626; } /* ========================= CONTAINER ========================= */ .container{ max-width:1250px; margin:30px auto; padding:0 18px; } /* ========================= LOGIN ========================= */ .login-box{ background:white; max-width:430px; margin:70px auto; padding:28px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,.08); } .login-box h2{ margin-bottom:20px; } .form-group{ margin-bottom:16px; } label{ display:block; margin-bottom:7px; font-weight:bold; } input, select, textarea{ width:100%; padding:12px; border:1px solid #d1d5db; border-radius:8px; font-size:15px; background:white; } textarea{ min-height:90px; resize:vertical; } input:focus, select:focus, textarea:focus{ outline:none; border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); } .primary-btn{ width:100%; background:#16a34a; color:white; border:0; padding:13px; border-radius:8px; font-size:16px; font-weight:bold; } .primary-btn:hover{ background:#15803d; } .back-btn{ width:100%; background:#6b7280; color:white; border:0; padding:12px; border-radius:8px; margin-top:10px; font-weight:bold; } .forgot-btn{ width:100%; background:transparent; border:0; color:#2563eb; padding:12px; margin-top:8px; font-weight:bold; } .message{ display:none; margin-top:15px; padding:12px; border-radius:8px; line-height:1.5; } .error{ background:#fee2e2; color:#991b1b; } .success{ background:#dcfce7; color:#166534; } .info{ background:#dbeafe; color:#1e40af; } /* ========================= DASHBOARD ========================= */ .dashboard{ display:none; } .stats{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:22px; } .stat{ background:white; border-radius:14px; padding:18px; box-shadow:0 5px 18px rgba(0,0,0,.06); border-left:5px solid #2563eb; } .stat:nth-child(1){ border-left-color:#f59e0b; } .stat:nth-child(2){ border-left-color:#2563eb; } .stat:nth-child(3){ border-left-color:#8b5cf6; } .stat:nth-child(4){ border-left-color:#06b6d4; } .stat:nth-child(5){ border-left-color:#16a34a; } .stat-title{ font-size:14px; font-weight:bold; color:#64748b; } .stat strong{ display:block; font-size:30px; margin-top:8px; } /* ========================= PANEL ========================= */ .panel{ background:white; border-radius:16px; padding:22px; box-shadow:0 5px 20px rgba(0,0,0,.07); } .panel-top{ display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:18px; flex-wrap:wrap; } .panel-top h2{ font-size:21px; } .refresh-btn{ background:#111827; color:white; border:0; padding:10px 15px; border-radius:8px; font-weight:bold; } /* ========================= FILTERS ========================= */ .filters{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; } .filter-btn{ border:1px solid #d1d5db; background:#fff; color:#374151; padding:9px 13px; border-radius:8px; font-weight:bold; } .filter-btn:hover{ border-color:#2563eb; } .filter-btn.active{ background:#2563eb; color:white; border-color:#2563eb; } /* ========================= NEW ORDER ALERT ========================= */ .new-order-alert{ display:none; background:#fff7ed; border:2px solid #f97316; color:#9a3412; border-radius:12px; padding:15px; margin-bottom:18px; font-weight:bold; animation:pulseAlert 1s infinite; } @keyframes pulseAlert{ 0%,100%{ box-shadow:0 0 0 rgba(249,115,22,0); } 50%{ box-shadow:0 0 20px rgba(249,115,22,.35); } } /* ========================= ORDER CARDS ========================= */ .orders{ display:grid; grid-template-columns:1fr; gap:16px; } .order-card{ border:1px solid #e5e7eb; border-radius:15px; padding:18px; background:white; transition:.2s; } .order-card:hover{ box-shadow:0 8px 25px rgba(0,0,0,.08); transform:translateY(-1px); } .order-card.new-order{ border:2px solid #f97316; background:#fffaf5; } .order-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:15px; } .order-number{ font-size:18px; font-weight:800; color:#111827; } .order-date{ color:#64748b; font-size:13px; margin-top:5px; } .status-badge{ display:inline-flex; align-items:center; padding:7px 11px; border-radius:999px; font-size:13px; font-weight:bold; white-space:nowrap; } .status-bekliyor{ background:#fef3c7; color:#92400e; } .status-onaylandi{ background:#dbeafe; color:#1e40af; } .status-kurye-atandi{ background:#ede9fe; color:#5b21b6; } .status-yolda{ background:#cffafe; color:#155e75; } .status-teslim-edildi{ background:#dcfce7; color:#166534; } .status-iptal{ background:#fee2e2; color:#991b1b; } .order-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px; } .info-box{ background:#f8fafc; border-radius:10px; padding:12px; } .info-label{ font-size:12px; color:#64748b; font-weight:bold; margin-bottom:5px; } .info-value{ font-size:15px; color:#111827; word-break:break-word; } .address-box{ background:#f8fafc; border-radius:10px; padding:14px; margin-bottom:12px; } .address-row{ display:flex; gap:10px; margin-bottom:10px; } .address-row:last-child{ margin-bottom:0; } .address-icon{ font-size:20px; } .address-content{ flex:1; } .order-notes{ background:#fffbeb; border:1px solid #fde68a; padding:12px; border-radius:10px; margin-bottom:14px; line-height:1.5; } .price-area{ display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap; } .price-area label{ margin:0; } .price-input{ width:140px; } .order-actions{ display:flex; gap:8px; flex-wrap:wrap; } .action-btn{ border:0; border-radius:8px; padding:10px 13px; color:white; font-weight:bold; transition:.15s; } .action-btn:hover{ opacity:.9; transform:translateY(-1px); } .btn-confirm{ background:#2563eb; } .btn-courier{ background:#7c3aed; } .btn-road{ background:#0891b2; } .btn-complete{ background:#16a34a; } .btn-cancel{ background:#dc2626; } .btn-save-price{ background:#111827; } /* ========================= EMPTY ========================= */ .empty{ text-align:center; padding:50px 20px; color:#64748b; } .empty-icon{ font-size:50px; margin-bottom:12px; } /* ========================= LOADING ========================= */ .loading{ text-align:center; padding:30px; color:#64748b; } /* ========================= MOBILE ========================= */ @media(max-width:1000px){ .stats{ grid-template-columns:repeat(3,1fr); } } @media(max-width:700px){ header{ flex-direction:column; align-items:flex-start; } .header-actions{ width:100%; } .header-btn{ flex:1; } .stats{ grid-template-columns:repeat(2,1fr); } .order-grid{ grid-template-columns:1fr; } .panel{ padding:15px; } .container{ padding:0 10px; } } @media(max-width:450px){ .stats{ grid-template-columns:1fr; } .order-actions{ display:grid; grid-template-columns:1fr 1fr; } .action-btn{ width:100%; min-height:44px; padding:9px 6px; font-size:12px; } header h1{ font-size:18px; } .login-box{ margin:35px auto; padding:20px; } } </style> </head> <body> <header> <h1>🚚 Bursa Hızlı Teslimat - Yönetim Paneli</h1> <div class="header-actions"> <button id="soundBtn" class="header-btn sound-btn"> 🔊 Ses Açık </button> <button id="logoutBtn" class="header-btn logout-btn hidden"> Çıkış Yap </button> </div> </header> <main class="container"> <!-- ========================= LOGIN ========================= --> <section id="loginSection" class="login-box"> <h2>🔐 Yönetici Girişi</h2> <div class="form-group"> <label for="email">E-posta</label> <input type="email" id="email" placeholder="Yönetici e-postanız" autocomplete="email" > </div> <div class="form-group"> <label for="password">Şifre</label> <input type="password" id="password" placeholder="Şifreniz" autocomplete="current-password" > </div> <button id="loginBtn" class="primary-btn"> Giriş Yap </button> <button id="forgotBtn" class="forgot-btn"> 🔑 Şifremi Unuttum </button> <div id="loginMessage" class="message"></div> </section> <!-- ========================= FORGOT PASSWORD ========================= --> <section id="forgotSection" class="login-box hidden"> <h2>📧 Şifre Sıfırlama</h2> <p style="margin-bottom:18px;line-height:1.5;"> Yönetici e-posta adresinizi girin. Size şifre yenileme bağlantısı göndereceğiz. </p> <div class="form-group"> <label for="forgotEmail">E-posta</label> <input type="email" id="forgotEmail" placeholder="Yönetici e-postanız" autocomplete="email" > </div> <button id="sendResetBtn" class="primary-btn"> Şifre Sıfırlama Bağlantısı Gönder </button> <button id="backLoginBtn" class="back-btn"> ← Giriş Ekranına Dön </button> <div id="forgotMessage" class="message"></div> </section> <!-- ========================= RESET PASSWORD ========================= --> <section id="resetSection" class="login-box hidden"> <h2>🔑 Yeni Yönetici Şifresi</h2> <p style="margin-bottom:18px;line-height:1.5;"> Yeni yönetici şifrenizi belirleyin. </p> <div class="form-group"> <label for="newPassword">Yeni Şifre</label> <input type="password" id="newPassword" placeholder="En az 8 karakter" autocomplete="new-password" > </div> <div class="form-group"> <label for="newPassword2">Yeni Şifre Tekrar</label> <input type="password" id="newPassword2" placeholder="Yeni şifrenizi tekrar girin" autocomplete="new-password" > </div> <button id="resetPasswordBtn" class="primary-btn"> Yeni Şifreyi Kaydet </button> <div id="resetMessage" class="message"></div> </section> <!-- ========================= DASHBOARD ========================= --> <section id="dashboard" class="dashboard"> <div class="stats"> <div class="stat"> <div class="stat-title">📦 Bekleyen</div> <strong id="bekleyenCount">0</strong> </div> <div class="stat"> <div class="stat-title">✅ Onaylanan</div> <strong id="onaylananCount">0</strong> </div> <div class="stat"> <div class="stat-title">🏍️ Kurye Atanan</div> <strong id="kuryeCount">0</strong> </div> <div class="stat"> <div class="stat-title">🚚 Yolda</div> <strong id="yoldaCount">0</strong> </div> <div class="stat"> <div class="stat-title">🎯 Tamamlanan</div> <strong id="tamamlananCount">0</strong> </div> </div> <div class="panel"> <div class="panel-top"> <h2>📦 Teslimat Talepleri</h2> <button id="refreshBtn" class="refresh-btn"> 🔄 Yenile </button> </div> <div id="newOrderAlert" class="new-order-alert"> 🔔 YENİ TESLİMAT TALEBİ GELDİ! </div> <div class="filters"> <button class="filter-btn active" data-filter="all"> Tümü </button> <button class="filter-btn" data-filter="bekliyor"> 📦 Bekleyen </button> <button class="filter-btn" data-filter="onaylandi"> ✅ Onaylanan </button> <button class="filter-btn" data-filter="kurye_atandi"> 🏍️ Kurye Atanan </button> <button class="filter-btn" data-filter="yolda"> 🚚 Yolda </button> <button class="filter-btn" data-filter="teslim_edildi"> 🎯 Teslim Edildi </button> <button class="filter-btn" data-filter="iptal"> ❌ İptal </button> </div> <div id="dashboardMessage" class="message"></div> <div id="ordersContainer" class="orders"> <div class="loading"> Talepler yükleniyor... </div> </div> </div> </section> </main> <script type="module"> import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"; /* ========================================================= SUPABASE ========================================================= */ const SUPABASE_URL = "https://cwfkrwfvxurmtjkvllul.supabase.co"; const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Kg3VNlkTYcjRDctC5RHPxA_eaX7YkCA"; const supabase = createClient( SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } } ); /* ========================================================= ELEMENTLER ========================================================= */ const loginSection = document.getElementById("loginSection"); const forgotSection = document.getElementById("forgotSection"); const resetSection = document.getElementById("resetSection"); const dashboard = document.getElementById("dashboard"); const loginBtn = document.getElementById("loginBtn"); const logoutBtn = document.getElementById("logoutBtn"); const soundBtn = document.getElementById("soundBtn"); const refreshBtn = document.getElementById("refreshBtn"); const forgotBtn = document.getElementById("forgotBtn"); const backLoginBtn = document.getElementById("backLoginBtn"); const sendResetBtn = document.getElementById("sendResetBtn"); const resetPasswordBtn = document.getElementById("resetPasswordBtn"); const emailInput = document.getElementById("email"); const passwordInput = document.getElementById("password"); const forgotEmailInput = document.getElementById("forgotEmail"); const newPasswordInput = document.getElementById("newPassword"); const newPassword2Input = document.getElementById("newPassword2"); const loginMessage = document.getElementById("loginMessage"); const forgotMessage = document.getElementById("forgotMessage"); const resetMessage = document.getElementById("resetMessage"); const dashboardMessage = document.getElementById("dashboardMessage"); const ordersContainer = document.getElementById("ordersContainer"); const newOrderAlert = document.getElementById("newOrderAlert"); /* ========================================================= DURUM ========================================================= */ let allOrders = []; let currentFilter = "all"; let soundEnabled = true; let previousOrderIds = new Set(); let firstLoad = true; let pollTimer = null; let audioContext = null; /* ========================================================= MESAJ ========================================================= */ function showMessage(element,text,type="error"){ element.textContent = text; element.className = "message " + type; element.style.display = "block"; } function hideMessage(element){ element.style.display = "none"; } /* ========================================================= EKRANLAR ========================================================= */ function showLogin(){ loginSection.classList.remove("hidden"); forgotSection.classList.add("hidden"); resetSection.classList.add("hidden"); dashboard.style.display = "none"; logoutBtn.classList.add("hidden"); } function showForgot(){ loginSection.classList.add("hidden"); forgotSection.classList.remove("hidden"); resetSection.classList.add("hidden"); dashboard.style.display = "none"; logoutBtn.classList.add("hidden"); hideMessage(loginMessage); } function showReset(){ loginSection.classList.add("hidden"); forgotSection.classList.add("hidden"); resetSection.classList.remove("hidden"); dashboard.style.display = "none"; logoutBtn.classList.add("hidden"); } function showDashboard(){ loginSection.classList.add("hidden"); forgotSection.classList.add("hidden"); resetSection.classList.add("hidden"); dashboard.style.display = "block"; logoutBtn.classList.remove("hidden"); startDashboard(); } /* ========================================================= ADMIN KONTROLÜ ========================================================= */ async function checkAdmin(){ const { data:{ user } } = await supabase.auth.getUser(); if(!user){ showLogin(); return false; } const { data, error } = await supabase .from("admin_kullanicilar") .select("user_id") .eq("user_id",user.id) .maybeSingle(); if(error){ console.error(error); showLogin(); showMessage( loginMessage, "Yönetici kontrolünde hata oluştu: " + error.message ); return false; } if(!data){ await supabase.auth.signOut(); showLogin(); showMessage( loginMessage, "Bu hesap yönetici olarak yetkilendirilmemiş." ); return false; } showDashboard(); return true; } /* ========================================================= GİRİŞ ========================================================= */ loginBtn.addEventListener( "click", async ()=>{ hideMessage(loginMessage); const email = emailInput.value.trim(); const password = passwordInput.value; if(!email || !password){ showMessage( loginMessage, "E-posta ve şifre alanlarını doldurun." ); return; } loginBtn.disabled = true; loginBtn.textContent = "Giriş yapılıyor..."; const { error } = await supabase.auth.signInWithPassword({ email, password }); loginBtn.disabled = false; loginBtn.textContent = "Giriş Yap"; if(error){ console.error(error); showMessage( loginMessage, "Giriş başarısız: " + error.message ); return; } /* * Kullanıcı giriş yaptı. * Tarayıcı artık ses çalabilecek duruma geldi. */ initAudio(); await checkAdmin(); } ); /* ========================================================= ENTER İLE GİRİŞ ========================================================= */ passwordInput.addEventListener( "keydown", event=>{ if(event.key === "Enter"){ loginBtn.click(); } } ); /* ========================================================= ŞİFRE UNUTTUM ========================================================= */ forgotBtn.addEventListener( "click", ()=>{ forgotEmailInput.value = emailInput.value.trim(); showForgot(); } ); /* ========================================================= GERİ ========================================================= */ backLoginBtn.addEventListener( "click", ()=>{ showLogin(); } ); /* ========================================================= ŞİFRE SIFIRLAMA MAILİ ========================================================= */ sendResetBtn.addEventListener( "click", async ()=>{ hideMessage(forgotMessage); const email = forgotEmailInput.value.trim(); if(!email){ showMessage( forgotMessage, "E-posta adresinizi girin." ); return; } sendResetBtn.disabled = true; sendResetBtn.textContent = "Gönderiliyor..."; const redirectUrl = window.location.origin + window.location.pathname; const { error } = await supabase.auth.resetPasswordForEmail( email, { redirectTo:redirectUrl } ); sendResetBtn.disabled = false; sendResetBtn.textContent = "Şifre Sıfırlama Bağlantısı Gönder"; if(error){ console.error(error); showMessage( forgotMessage, "Hata: " + error.message ); return; } showMessage( forgotMessage, "Şifre yenileme bağlantısı e-posta adresinize gönderildi.", "success" ); } ); /* ========================================================= YENİ ŞİFRE ========================================================= */ resetPasswordBtn.addEventListener( "click", async ()=>{ hideMessage(resetMessage); const password = newPasswordInput.value; const password2 = newPassword2Input.value; if(password.length < 8){ showMessage( resetMessage, "Şifre en az 8 karakter olmalıdır." ); return; } if(password !== password2){ showMessage( resetMessage, "Şifreler aynı değil." ); return; } resetPasswordBtn.disabled = true; resetPasswordBtn.textContent = "Kaydediliyor..."; const { error } = await supabase.auth.updateUser({ password }); resetPasswordBtn.disabled = false; resetPasswordBtn.textContent = "Yeni Şifreyi Kaydet"; if(error){ console.error(error); showMessage( resetMessage, "Şifre değiştirilemedi: " + error.message ); return; } showMessage( resetMessage, "Şifreniz başarıyla değiştirildi. Şimdi giriş yapabilirsiniz.", "success" ); setTimeout( async ()=>{ await supabase.auth.signOut(); showLogin(); }, 1800 ); } ); /* ========================================================= ÇIKIŞ ========================================================= */ logoutBtn.addEventListener( "click", async ()=>{ stopPolling(); await supabase.auth.signOut(); allOrders = []; previousOrderIds = new Set(); showLogin(); } ); /* ========================================================= SES SİSTEMİ ========================================================= */ function initAudio(){ try{ if(!audioContext){ audioContext = new ( window.AudioContext || window.webkitAudioContext )(); } if(audioContext.state === "suspended"){ audioContext.resume(); } }catch(error){ console.warn( "Ses sistemi başlatılamadı:", error ); } } function playNewOrderSound(){ if(!soundEnabled){ return; } try{ initAudio(); if(!audioContext){ return; } const now = audioContext.currentTime; /* * Üç kısa bip. * Yeni sipariş geldiğinde dikkat çekici ses. */ [0,0.22,0.44].forEach( (offset,index)=>{ const oscillator = audioContext.createOscillator(); const gain = audioContext.createGain(); oscillator.type = "sine"; oscillator.frequency.value = index === 1 ? 880 : 660; gain.gain.setValueAtTime( 0, now + offset ); gain.gain.linearRampToValueAtTime( 0.22, now + offset + 0.02 ); gain.gain.exponentialRampToValueAtTime( 0.001, now + offset + 0.18 ); oscillator.connect(gain); gain.connect( audioContext.destination ); oscillator.start( now + offset ); oscillator.stop( now + offset + 0.2 ); } ); }catch(error){ console.warn( "Yeni sipariş sesi çalınamadı:", error ); } } soundBtn.addEventListener( "click", ()=>{ soundEnabled = !soundEnabled; if(soundEnabled){ soundBtn.textContent = "🔊 Ses Açık"; soundBtn.classList.remove( "off" ); initAudio(); }else{ soundBtn.textContent = "🔇 Ses Kapalı"; soundBtn.classList.add( "off" ); } } ); /* ========================================================= YENİ SİPARİŞ UYARISI ========================================================= */ function showNewOrderAlert(){ newOrderAlert.style.display = "block"; setTimeout( ()=>{ newOrderAlert.style.display = "none"; }, 10000 ); } /* ========================================================= SİPARİŞLERİ YÜKLE ========================================================= */ async function loadOrders(){ if(!ordersContainer){ return; } const { data, error } = await supabase .from("teslimat_talepleri") .select("*") .order("created_at",{ ascending:false }); if(error){ console.error(error); showMessage( dashboardMessage, "Siparişler alınamadı: " + error.message ); return; } hideMessage( dashboardMessage ); const newIds = new Set( (data || []).map( order=>order.id ) ); if(!firstLoad){ const hasNewOrder = [...newIds].some( id=>!previousOrderIds.has(id) ); if(hasNewOrder){ playNewOrderSound(); showNewOrderAlert(); } } firstLoad = false; previousOrderIds = newIds; allOrders = data || []; updateStats(); renderOrders(); } /* ========================================================= İSTATİSTİKLER ========================================================= */ function updateStats(){ const count = status=> allOrders.filter( order=> order.durum === status ).length; document.getElementById( "bekleyenCount" ).textContent = count("bekliyor"); document.getElementById( "onaylananCount" ).textContent = count("onaylandi"); document.getElementById( "kuryeCount" ).textContent = count("kurye_atandi"); document.getElementById( "yoldaCount" ).textContent = count("yolda"); document.getElementById( "tamamlananCount" ).textContent = count("teslim_edildi"); } /* ========================================================= TARİH ========================================================= */ function formatDate(date){ if(!date){ return "-"; } return new Date(date).toLocaleString( "tr-TR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" } ); } /* ========================================================= DURUM METNİ ========================================================= */ function statusText(status){ const map = { bekliyor:"📦 Bekliyor", onaylandi:"✅ Onaylandı", kurye_atandi:"🏍️ Kurye Atandı", yolda:"🚚 Yolda", teslim_edildi:"🏁 Teslim Edildi", iptal:"❌ İptal" }; return map[status] || status || "-"; } /* ========================================================= HTML GÜVENLİK ========================================================= */ function escapeHtml(value){ if(value === null || value === undefined){ return ""; } return String(value) .replace(/&/g,"&amp;") .replace(/</g,"&lt;") .replace(/>/g,"&gt;") .replace(/"/g,"&quot;") .replace(/'/g,"&#039;"); } /* ========================================================= SİPARİŞLERİ GÖSTER ========================================================= */ function renderOrders(){ let orders = allOrders; if(currentFilter !== "all"){ orders = orders.filter( order=> order.durum === currentFilter ); } if(!orders.length){ ordersContainer.innerHTML = ` <div class="empty"> <div class="empty-icon">📭</div> <strong>Bu bölümde sipariş bulunmuyor.</strong> <p style="margin-top:8px;"> Yeni teslimat talepleri geldiğinde burada görünecek. </p> </div> `; return; } ordersContainer.innerHTML = orders.map( createOrderCard ).join(""); attachOrderEvents(); } /* ========================================================= SİPARİŞ KARTI ========================================================= */ function createOrderCard(order){ const statusClass = "status-" + String(order.durum || "") .replace(/_/g,"-"); const packageType = order.paket_tipi || "Belirtilmedi"; const urgency = order.aciliyet || "normal"; const price = order.fiyat !== null && order.fiyat !== undefined ? order.fiyat : ""; const notes = [ order.aciklama ? "📝 " + escapeHtml(order.aciklama) : "", order.notlar ? "💬 " + escapeHtml(order.notlar) : "" ] .filter(Boolean) .join("<br>"); return ` <article class="order-card ${ order.durum === "bekliyor" ? "new-order" : "" }" data-order-id="${escapeHtml(order.id)}" > <div class="order-header"> <div> <div class="order-number"> 📦 ${escapeHtml(order.siparis_no)} </div> <div class="order-date"> ${formatDate(order.created_at)} </div> </div> <div class="status-badge ${statusClass}"> ${statusText(order.durum)} </div> </div> <div class="order-grid"> <div class="info-box"> <div class="info-label"> 👤 Müşteri </div> <div class="info-value"> ${escapeHtml(order.ad_soyad)} </div> </div> <div class="info-box"> <div class="info-label"> 📞 Telefon </div> <div class="info-value"> ${escapeHtml(order.telefon)} </div> </div> <div class="info-box"> <div class="info-label"> 📦 Paket </div> <div class="info-value"> ${escapeHtml(packageType)} </div> </div> <div class="info-box"> <div class="info-label"> ⚡ Aciliyet </div> <div class="info-value"> ${escapeHtml(urgency)} </div> </div> </div> <div class="address-box"> <div class="address-row"> <div class="address-icon"> 📍 </div> <div class="address-content"> <div class="info-label"> Alış Adresi </div> <div class="info-value"> ${escapeHtml(order.alis_adresi)} </div> </div> </div> <div class="address-row"> <div class="address-icon"> 🏁 </div> <div class="address-content"> <div class="info-label"> Teslimat Adresi </div> <div class="info-value"> ${escapeHtml(order.teslimat_adresi)} </div> </div> </div> </div> ${ notes ? ` <div class="order-notes"> ${notes} </div> ` : "" } <div class="price-area"> <label> 💰 Fiyat </label> <input type="number" class="price-input order-price" data-id="${escapeHtml(order.id)}" value="${escapeHtml(price)}" min="0" step="0.01" placeholder="0.00" > <span>TL</span> <button class="action-btn btn-save-price save-price-btn" data-id="${escapeHtml(order.id)}" > 💾 Fiyatı Kaydet </button> </div> <div class="order-actions"> <button class="action-btn btn-confirm status-btn" data-id="${escapeHtml(order.id)}" data-status="onaylandi" > ✅ Onayla </button> <button class="action-btn btn-courier status-btn" data-id="${escapeHtml(order.id)}" data-status="kurye_atandi" > 🏍️ Kurye Ata </button> <button class="action-btn btn-road status-btn" data-id="${escapeHtml(order.id)}" data-status="yolda" > 🚚 Yola Çıktı </button> <button class="action-btn btn-complete status-btn" data-id="${escapeHtml(order.id)}" data-status="teslim_edildi" > 🏁 Teslim Edildi </button> <button class="action-btn btn-cancel status-btn" data-id="${escapeHtml(order.id)}" data-status="iptal" > ❌ İptal </button> </div> </article> `; } /* ========================================================= BUTONLARI BAĞLA ========================================================= */ function attachOrderEvents(){ document .querySelectorAll(".status-btn") .forEach( button=>{ button.addEventListener( "click", async ()=>{ const id = button.dataset.id; const status = button.dataset.status; await updateOrderStatus( id, status, button ); } ); } ); document .querySelectorAll(".save-price-btn") .forEach( button=>{ button.addEventListener( "click", async ()=>{ const id = button.dataset.id; const input = document.querySelector( `.order-price[data-id="${CSS.escape(id)}"]` ); const price = input ? input.value : ""; await updateOrderPrice( id, price, button ); } ); } ); } /* ========================================================= DURUM GÜNCELLE ========================================================= */ async function updateOrderStatus( id, status, button ){ const oldText = button.textContent; button.disabled = true; button.textContent = "Kaydediliyor..."; const { error } = await supabase .from("teslimat_talepleri") .update({ durum:status }) .eq("id",id); button.disabled = false; button.textContent = oldText; if(error){ console.error(error); showMessage( dashboardMessage, "Sipariş güncellenemedi: " + error.message, "error" ); return; } showMessage( dashboardMessage, "Sipariş durumu güncellendi.", "success" ); /* * Veritabanından tekrar okuyarak * ekranda gerçek durumu gösteriyoruz. */ await loadOrders(); } /* ========================================================= FİYAT GÜNCELLE ========================================================= */ async function updateOrderPrice( id, price, button ){ const numericPrice = Number(price); if( price !== "" && ( Number.isNaN(numericPrice) || numericPrice < 0 ) ){ showMessage( dashboardMessage, "Geçerli bir fiyat girin.", "error" ); return; } const oldText = button.textContent; button.disabled = true; button.textContent = "Kaydediliyor..."; const { error } = await supabase .from("teslimat_talepleri") .update({ fiyat: price === "" ? null : numericPrice }) .eq("id",id); button.disabled = false; button.textContent = oldText; if(error){ console.error(error); showMessage( dashboardMessage, "Fiyat güncellenemedi: " + error.message, "error" ); return; } showMessage( dashboardMessage, "Fiyat başarıyla kaydedildi.", "success" ); await loadOrders(); } /* ========================================================= FİLTRELER ========================================================= */ document .querySelectorAll(".filter-btn") .forEach( button=>{ button.addEventListener( "click", ()=>{ document .querySelectorAll(".filter-btn") .forEach( item=> item.classList.remove( "active" ) ); button.classList.add( "active" ); currentFilter = button.dataset.filter; renderOrders(); } ); } ); /* ========================================================= YENİLE ========================================================= */ refreshBtn.addEventListener( "click", async ()=>{ refreshBtn.disabled = true; refreshBtn.textContent = "🔄 Yükleniyor..."; await loadOrders(); refreshBtn.disabled = false; refreshBtn.textContent = "🔄 Yenile"; } ); /* ========================================================= OTOMATİK KONTROL ========================================================= */ function startPolling(){ stopPolling(); pollTimer = setInterval( async ()=>{ const { data:{ user } } = await supabase.auth.getUser(); if(user){ await loadOrders(); } }, 10000 ); } function stopPolling(){ if(pollTimer){ clearInterval( pollTimer ); pollTimer = null; } } /* ========================================================= DASHBOARD BAŞLAT ========================================================= */ function startDashboard(){ firstLoad = true; previousOrderIds = new Set(); loadOrders(); startPolling(); } /* ========================================================= AUTH DURUMU ========================================================= */ supabase.auth.onAuthStateChange( async (event,session)=>{ if( event === "PASSWORD_RECOVERY" ){ showReset(); return; } if( session && event !== "SIGNED_OUT" ){ await checkAdmin(); } } ); /* ========================================================= SAYFA AÇILIŞI ========================================================= */ async function init(){ const hash = window.location.hash; /* * Supabase şifre kurtarma bağlantısı * ile geldiyse reset ekranını göster. */ if( hash.includes("type=recovery") ){ showReset(); return; } await checkAdmin(); } init(); </script> </body> </html>
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bursa Hızlı Teslimat | Yönetim Paneli</title>
+
+<style>
+
+:root{
+    --bg:#06101d;
+    --panel:#0d1b2c;
+    --panel2:#12243a;
+    --primary:#19c37d;
+    --primary2:#35a7ff;
+    --text:#f4f8fc;
+    --muted:#94a6ba;
+    --border:rgba(255,255,255,.09);
+    --danger:#ff6262;
+    --warning:#ffbd4a;
+    --shadow:0 25px 70px rgba(0,0,0,.35);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+        radial-gradient(circle at 15% 10%,rgba(25,195,125,.10),transparent 30%),
+        radial-gradient(circle at 85% 15%,rgba(53,167,255,.10),transparent 30%),
+        var(--bg);
+    color:var(--text);
+}
+
+button,
+input{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+}
+
+.login-wrap{
+    width:100%;
+    max-width:460px;
+}
+
+.login-brand{
+    text-align:center;
+    margin-bottom:24px;
+}
+
+.brand-icon{
+    width:76px;
+    height:76px;
+    margin:0 auto 16px;
+    display:grid;
+    place-items:center;
+    border-radius:24px;
+    font-size:40px;
+    background:
+        linear-gradient(135deg,var(--primary),var(--primary2));
+    box-shadow:
+        0 20px 50px rgba(25,195,125,.20);
+}
+
+.login-brand h1{
+    font-size:28px;
+    margin-bottom:5px;
+}
+
+.login-brand p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.login-card{
+    padding:34px;
+    background:
+        linear-gradient(145deg,rgba(18,36,58,.98),rgba(9,23,39,.98));
+    border:1px solid var(--border);
+    border-radius:26px;
+    box-shadow:var(--shadow);
+}
+
+.login-card h2{
+    font-size:22px;
+    margin-bottom:7px;
+}
+
+.login-card-subtitle{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:25px;
+}
+
+.form-group{
+    margin-bottom:17px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:7px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.input-wrap{
+    position:relative;
+}
+
+.input-wrap input{
+    width:100%;
+    height:52px;
+    padding:0 48px 0 15px;
+    color:var(--text);
+    background:#071522;
+    border:1px solid var(--border);
+    border-radius:12px;
+    outline:none;
+    transition:.2s ease;
+}
+
+.input-wrap input:focus{
+    border-color:rgba(25,195,125,.7);
+    box-shadow:0 0 0 4px rgba(25,195,125,.08);
+}
+
+.input-wrap input::placeholder{
+    color:#617388;
+}
+
+.password-toggle{
+    position:absolute;
+    right:8px;
+    top:7px;
+    width:38px;
+    height:38px;
+    border:0;
+    border-radius:9px;
+    color:#b8c6d6;
+    background:transparent;
+}
+
+.password-toggle:hover{
+    background:rgba(255,255,255,.06);
+}
+
+.login-button{
+    width:100%;
+    height:52px;
+    margin-top:5px;
+    border:0;
+    border-radius:12px;
+    color:#03120c;
+    font-weight:800;
+    background:
+        linear-gradient(135deg,#27df91,var(--primary));
+    box-shadow:0 12px 30px rgba(25,195,125,.18);
+    transition:.2s ease;
+}
+
+.login-button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 35px rgba(25,195,125,.28);
+}
+
+.login-button:disabled{
+    opacity:.65;
+    transform:none;
+}
+
+.login-message{
+    margin-top:15px;
+    padding:13px;
+    border-radius:11px;
+    display:none;
+    font-size:13px;
+}
+
+.login-message.show{
+    display:block;
+}
+
+.login-message.error{
+    color:#ff9b9b;
+    background:rgba(255,98,98,.10);
+    border:1px solid rgba(255,98,98,.25);
+}
+
+.login-message.success{
+    color:#83f0be;
+    background:rgba(25,195,125,.10);
+    border:1px solid rgba(25,195,125,.25);
+}
+
+.forgot-button{
+    width:100%;
+    margin-top:17px;
+    border:0;
+    background:none;
+    color:#7bc8ff;
+    font-size:13px;
+}
+
+.forgot-button:hover{
+    color:white;
+}
+
+.security-note{
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px solid var(--border);
+    text-align:center;
+    color:#71859b;
+    font-size:11px;
+}
+
+/* =========================================================
+   PANEL
+   ========================================================= */
+
+.admin-header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(6,16,29,.94);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+}
+
+.admin-header-inner{
+    width:min(1400px,calc(100% - 32px));
+    min-height:76px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.admin-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.admin-title-icon{
+    width:45px;
+    height:45px;
+    display:grid;
+    place-items:center;
+    border-radius:13px;
+    background:linear-gradient(135deg,var(--primary),var(--primary2));
+    font-size:23px;
+}
+
+.admin-title strong{
+    display:block;
+    font-size:16px;
+}
+
+.admin-title small{
+    color:var(--muted);
+    font-size:11px;
+}
+
+.header-actions{
+    display:flex;
+    gap:8px;
+}
+
+.header-button{
+    min-height:40px;
+    padding:0 13px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    font-size:12px;
+    font-weight:700;
+}
+
+.header-button:hover{
+    background:rgba(255,255,255,.08);
+}
+
+.logout-button{
+    border-color:rgba(255,98,98,.25);
+    color:#ff9b9b;
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.admin-main{
+    width:min(1400px,calc(100% - 32px));
+    margin:30px auto 70px;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.stat-card{
+    padding:20px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:17px;
+}
+
+.stat-card span{
+    color:var(--muted);
+    font-size:11px;
+    font-weight:700;
+}
+
+.stat-card strong{
+    display:block;
+    margin-top:8px;
+    font-size:30px;
+}
+
+.stat-card:nth-child(1) strong{
+    color:var(--warning);
+}
+
+.stat-card:nth-child(2) strong{
+    color:#62c4ff;
+}
+
+.stat-card:nth-child(3) strong{
+    color:#b98cff;
+}
+
+.stat-card:nth-child(4) strong{
+    color:#ffc857;
+}
+
+.stat-card:nth-child(5) strong{
+    color:var(--primary);
+}
+
+.dashboard-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+}
+
+.filter-button{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.035);
+    color:#b8c6d6;
+    border-radius:9px;
+    padding:9px 12px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.filter-button.active{
+    background:rgba(25,195,125,.13);
+    color:#83f0be;
+    border-color:rgba(25,195,125,.35);
+}
+
+.refresh-button{
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:white;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:700;
+}
+
+/* =========================================================
+   ALERT
+   ========================================================= */
+
+.new-order-alert{
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    padding:17px 19px;
+    margin-bottom:17px;
+    border-radius:15px;
+    background:
+        linear-gradient(135deg,rgba(25,195,125,.16),rgba(53,167,255,.10));
+    border:1px solid rgba(25,195,125,.35);
+    animation:alertPulse 1.3s ease infinite alternate;
+}
+
+.new-order-alert.show{
+    display:flex;
+}
+
+@keyframes alertPulse{
+    from{
+        box-shadow:0 0 0 rgba(25,195,125,0);
+    }
+    to{
+        box-shadow:0 0 30px rgba(25,195,125,.15);
+    }
+}
+
+.new-order-alert strong{
+    display:block;
+    margin-bottom:3px;
+}
+
+.new-order-alert span{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================================================
+   ORDERS
+   ========================================================= */
+
+.orders-container{
+    display:grid;
+    gap:15px;
+}
+
+.order-card{
+    padding:22px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+.order-top{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    align-items:flex-start;
+    margin-bottom:17px;
+}
+
+.order-title strong{
+    display:block;
+    font-size:17px;
+}
+
+.order-title small{
+    color:#7e92a8;
+    font-size:11px;
+}
+
+.order-status{
+    padding:7px 10px;
+    border-radius:999px;
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--border);
+    color:#c8d5e3;
+    font-size:11px;
+    font-weight:800;
+}
+
+.order-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.order-info{
+    padding:12px;
+    border-radius:11px;
+    background:rgba(255,255,255,.025);
+    border:1px solid rgba(255,255,255,.055);
+}
+
+.order-info.full{
+    grid-column:1/-1;
+}
+
+.order-info label{
+    display:block;
+    margin-bottom:4px;
+    color:#71859b;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.order-info div{
+    color:#dce6f0;
+    font-size:13px;
+    word-break:break-word;
+}
+
+.price-row{
+    display:flex;
+    gap:8px;
+    margin-top:15px;
+}
+
+.price-row input{
+    flex:1;
+    min-width:0;
+    height:43px;
+    padding:0 12px;
+    color:white;
+    background:#071522;
+    border:1px solid var(--border);
+    border-radius:9px;
+    outline:none;
+}
+
+.price-row button{
+    border:0;
+    padding:0 15px;
+    border-radius:9px;
+    color:#04110b;
+    background:var(--primary);
+    font-weight:800;
+}
+
+.order-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--border);
+}
+
+.status-button{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:#dce6f0;
+    padding:9px 12px;
+    border-radius:9px;
+    font-size:11px;
+    font-weight:800;
+}
+
+.status-button:hover{
+    background:rgba(255,255,255,.09);
+}
+
+.status-button.green{
+    color:#83f0be;
+    border-color:rgba(25,195,125,.25);
+}
+
+.status-button.red{
+    color:#ff9b9b;
+    border-color:rgba(255,98,98,.25);
+}
+
+.empty-state{
+    padding:60px 20px;
+    text-align:center;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+}
+
+.empty-state strong{
+    display:block;
+    margin-bottom:6px;
+}
+
+.empty-state span{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.dashboard-message{
+    margin-bottom:15px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:950px){
+
+    .stats-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:700px){
+
+    .admin-header-inner{
+        min-height:68px;
+    }
+
+    .admin-title strong{
+        font-size:13px;
+    }
+
+    .admin-title small{
+        display:none;
+    }
+
+    .header-actions{
+        gap:5px;
+    }
+
+    .header-button{
+        padding:0 9px;
+        font-size:10px;
+    }
+
+    .admin-main{
+        width:min(100% - 20px,1400px);
+        margin-top:18px;
+    }
+
+    .stats-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .dashboard-toolbar{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .filters{
+        width:100%;
+    }
+
+    .filter-button{
+        flex:1;
+        min-width:100px;
+    }
+
+    .order-grid{
+        grid-template-columns:1fr;
+    }
+
+    .order-info.full{
+        grid-column:auto;
+    }
+
+    .order-actions{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+    }
+
+    .status-button{
+        width:100%;
+    }
+}
+
+@media(max-width:480px){
+
+    .login-card{
+        padding:25px 20px;
+    }
+
+    .login-brand h1{
+        font-size:23px;
+    }
+
+    .stats-grid{
+        gap:8px;
+    }
+
+    .stat-card{
+        padding:14px;
+    }
+
+    .stat-card strong{
+        font-size:25px;
+    }
+
+    .new-order-alert{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .price-row{
+        flex-direction:column;
+    }
+
+    .price-row button{
+        min-height:43px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     LOGIN
+     ========================================================= -->
+
+<section id="loginScreen" class="login-screen">
+
+    <div class="login-wrap">
+
+        <div class="login-brand">
+
+            <div class="brand-icon">
+                🏍️
+            </div>
+
+            <h1>
+                Bursa Hızlı Teslimat
+            </h1>
+
+            <p>
+                Yönetim Paneli
+            </p>
+
+        </div>
+
+        <div class="login-card">
+
+            <h2>
+                Yönetici Girişi
+            </h2>
+
+            <p class="login-card-subtitle">
+                Siparişlerinizi yönetmek için giriş yapın.
+            </p>
+
+            <div class="form-group">
+
+                <label for="email">
+                    E-posta
+                </label>
+
+                <div class="input-wrap">
+
+                    <input
+                        type="email"
+                        id="email"
+                        autocomplete="username"
+                        placeholder="E-posta adresiniz"
+                    >
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="password">
+                    Şifre
+                </label>
+
+                <div class="input-wrap">
+
+                    <input
+                        type="password"
+                        id="password"
+                        autocomplete="current-password"
+                        placeholder="Şifreniz"
+                    >
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="passwordToggle"
+                        aria-label="Şifreyi göster"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                id="loginBtn"
+                class="login-button"
+            >
+                🔐 Güvenli Giriş
+            </button>
+
+            <div
+                id="loginMessage"
+                class="login-message"
+            ></div>
+
+            <button
+                type="button"
+                id="forgotBtn"
+                class="forgot-button"
+            >
+                Şifremi unuttum
+            </button>
+
+            <div class="security-note">
+                🔒 Güvenli yönetici erişimi
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ADMIN PANEL
+     ========================================================= -->
+
+<div id="adminApp" class="hidden">
+
+<header class="admin-header">
+
+    <div class="admin-header-inner">
+
+        <div class="admin-title">
+
+            <div class="admin-title-icon">
+                🏍️
+            </div>
+
+            <div>
+                <strong>
+                    Bursa Hızlı Teslimat
+                </strong>
+
+                <small>
+                    Yönetim Paneli
+                </small>
+            </div>
+
+        </div>
+
+        <div class="header-actions">
+
+            <button
+                id="soundBtn"
+                class="header-button"
+                type="button"
+            >
+                🔊 Ses Açık
+            </button>
+
+            <button
+                id="notificationBtn"
+                class="header-button"
+                type="button"
+            >
+                🔔 Bildirim
+            </button>
+
+            <button
+                id="logoutBtn"
+                class="header-button logout-button"
+                type="button"
+            >
+                Çıkış
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="admin-main">
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <span>BEKLEYEN</span>
+            <strong id="bekleyenCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>ONAYLANAN</span>
+            <strong id="onaylananCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>KURYE ATANAN</span>
+            <strong id="kuryeCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>YOLDA</span>
+            <strong id="yoldaCount">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>TAMAMLANAN</span>
+            <strong id="tamamlananCount">0</strong>
+        </div>
+
+    </div>
+
+
+    <div
+        id="newOrderAlert"
+        class="new-order-alert"
+    >
+
+        <div>
+            <strong>
+                🚨 YENİ TESLİMAT TALEBİ
+            </strong>
+
+            <span>
+                Yeni sipariş geldi. Kontrol panelini açın.
+            </span>
+        </div>
+
+        <button
+            id="alertCloseBtn"
+            class="header-button"
+            type="button"
+        >
+            Kapat
+        </button>
+
+    </div>
+
+
+    <div class="dashboard-toolbar">
+
+        <div class="filters">
+
+            <button
+                class="filter-button active"
+                data-filter="all"
+            >
+                Tümü
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="bekliyor"
+            >
+                Bekliyor
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="onaylandi"
+            >
+                Onaylandı
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="kurye_atandi"
+            >
+                Kurye
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="yolda"
+            >
+                Yolda
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="teslim_edildi"
+            >
+                Teslim
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="iptal"
+            >
+                İptal
+            </button>
+
+        </div>
+
+        <button
+            id="refreshBtn"
+            class="refresh-button"
+            type="button"
+        >
+            🔄 Yenile
+        </button>
+
+    </div>
+
+
+    <div
+        id="dashboardMessage"
+        class="dashboard-message"
+    ></div>
+
+
+    <div
+        id="ordersContainer"
+        class="orders-container"
+    ></div>
+
+</main>
+
+</div>
+
+
+<script type="module">
+
+/* =========================================================
+   SUPABASE
+   ========================================================= */
+
+const SUPABASE_URL =
+    "https://cwfkrwfvxurmtjkvllul.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_Kg3VNlkTYcjRDctC5RHPxA_eaX7YkCA";
+
+const module =
+    await import(
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+    );
+
+const supabase =
+    module.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+            auth:{
+                persistSession:true,
+                autoRefreshToken:true,
+                detectSessionInUrl:true
+            }
+        }
+    );
+
+
+/* =========================================================
+   ELEMENTLER
+   ========================================================= */
+
+const loginScreen =
+    document.getElementById("loginScreen");
+
+const adminApp =
+    document.getElementById("adminApp");
+
+const emailInput =
+    document.getElementById("email");
+
+const passwordInput =
+    document.getElementById("password");
+
+const loginBtn =
+    document.getElementById("loginBtn");
+
+const loginMessage =
+    document.getElementById("loginMessage");
+
+const forgotBtn =
+    document.getElementById("forgotBtn");
+
+const passwordToggle =
+    document.getElementById("passwordToggle");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+const soundBtn =
+    document.getElementById("soundBtn");
+
+const notificationBtn =
+    document.getElementById("notificationBtn");
+
+const refreshBtn =
+    document.getElementById("refreshBtn");
+
+const ordersContainer =
+    document.getElementById("ordersContainer");
+
+const dashboardMessage =
+    document.getElementById("dashboardMessage");
+
+const newOrderAlert =
+    document.getElementById("newOrderAlert");
+
+const alertCloseBtn =
+    document.getElementById("alertCloseBtn");
+
+
+/* =========================================================
+   DURUM
+   ========================================================= */
+
+let currentFilter = "all";
+
+let allOrders = [];
+
+let previousOrderIds = [];
+
+let firstOrderLoad = true;
+
+let pollTimer = null;
+
+let soundEnabled = true;
+
+let audioContext = null;
+
+
+/* =========================================================
+   LOGIN MESAJI
+   ========================================================= */
+
+function showLoginMessage(
+    text,
+    type = "error"
+){
+
+    loginMessage.textContent = text;
+
+    loginMessage.className =
+        "login-message show " + type;
+}
+
+
+/* =========================================================
+   ADMIN KONTROLÜ
+   ========================================================= */
+
+async function isAdmin(userId){
+
+    const { data, error } =
+        await supabase
+            .from("admin_kullanicilar")
+            .select("user_id")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+    if(error){
+        console.error(error);
+        return false;
+    }
+
+    return !!data;
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+async function login(){
+
+    const email =
+        emailInput.value.trim();
+
+    const password =
+        passwordInput.value;
+
+    if(!email || !password){
+
+        showLoginMessage(
+            "Lütfen e-posta ve şifrenizi girin."
+        );
+
+        return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent =
+        "⏳ Giriş yapılıyor...";
+
+    try{
+
+        const { data, error } =
+            await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+        if(error){
+            throw error;
+        }
+
+        if(!data.user){
+            throw new Error(
+                "Kullanıcı bilgisi alınamadı."
+            );
+        }
+
+        const admin =
+            await isAdmin(data.user.id);
+
+        if(!admin){
+
+            await supabase.auth.signOut();
+
+            throw new Error(
+                "Bu hesap yönetici yetkisine sahip değil."
+            );
+        }
+
+        initAudio();
+
+        await requestNotifications();
+
+        showAdminPanel();
+
+        await loadOrders();
+
+        startPolling();
+
+    }catch(error){
+
+        console.error(error);
+
+        showLoginMessage(
+            error.message ||
+            "Giriş yapılamadı."
+        );
+
+    }finally{
+
+        loginBtn.disabled = false;
+
+        loginBtn.textContent =
+            "🔐 Güvenli Giriş";
+    }
+}
+
+
+/* =========================================================
+   PANELİ GÖSTER
+   ========================================================= */
+
+function showAdminPanel(){
+
+    loginScreen.classList.add(
+        "hidden"
+    );
+
+    adminApp.classList.remove(
+        "hidden"
+    );
+}
+
+
+/* =========================================================
+   PANELİ GİZLE
+   ========================================================= */
+
+function showLoginPanel(){
+
+    adminApp.classList.add(
+        "hidden"
+    );
+
+    loginScreen.classList.remove(
+        "hidden"
+    );
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+async function logout(){
+
+    stopPolling();
+
+    await supabase.auth.signOut();
+
+    showLoginPanel();
+
+    passwordInput.value = "";
+}
+
+
+/* =========================================================
+   ŞİFRE GÖSTER
+   ========================================================= */
+
+passwordToggle.addEventListener(
+    "click",
+    () => {
+
+        const isPassword =
+            passwordInput.type === "password";
+
+        passwordInput.type =
+            isPassword
+                ? "text"
+                : "password";
+
+        passwordToggle.textContent =
+            isPassword
+                ? "🙈"
+                : "👁️";
+    }
+);
+
+
+/* =========================================================
+   ENTER
+   ========================================================= */
+
+[emailInput,passwordInput].forEach(
+    (input) => {
+
+        input.addEventListener(
+            "keydown",
+            (event) => {
+
+                if(event.key === "Enter"){
+                    login();
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   SES SİSTEMİ
+   ========================================================= */
+
+function initAudio(){
+
+    try{
+
+        if(!audioContext){
+
+            audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+        }
+
+        if(
+            audioContext.state ===
+            "suspended"
+        ){
+
+            audioContext.resume();
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Ses sistemi:",
+            error
+        );
+
+    }
+}
+
+
+/* =========================================================
+   TEK TON
+   ========================================================= */
+
+function playTone(
+    frequency,
+    startTime,
+    duration,
+    volume = 0.32
+){
+
+    if(!audioContext){
+        return;
+    }
+
+    const oscillator =
+        audioContext.createOscillator();
+
+    const gain =
+        audioContext.createGain();
+
+    oscillator.type =
+        "sine";
+
+    oscillator.frequency.setValueAtTime(
+        frequency,
+        startTime
+    );
+
+    gain.gain.setValueAtTime(
+        0.001,
+        startTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        volume,
+        startTime + 0.025
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        startTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(
+        audioContext.destination
+    );
+
+    oscillator.start(
+        startTime
+    );
+
+    oscillator.stop(
+        startTime + duration + 0.03
+    );
+}
+
+
+/* =========================================================
+   YENİ SİPARİŞ SESİ
+   ========================================================= */
+
+function playNewOrderSound(){
+
+    if(!soundEnabled){
+        return;
+    }
+
+    initAudio();
+
+    if(!audioContext){
+        return;
+    }
+
+    const now =
+        audioContext.currentTime;
+
+    playTone(
+        660,
+        now,
+        0.22,
+        0.38
+    );
+
+    playTone(
+        880,
+        now + 0.23,
+        0.22,
+        0.42
+    );
+
+    playTone(
+        1046,
+        now + 0.46,
+        0.30,
+        0.45
+    );
+
+    playTone(
+        880,
+        now + 0.82,
+        0.28,
+        0.40
+    );
+}
+
+
+/* =========================================================
+   TEST SESİ
+   ========================================================= */
+
+function playTestSound(){
+
+    initAudio();
+
+    if(!audioContext){
+        return;
+    }
+
+    const now =
+        audioContext.currentTime;
+
+    playTone(
+        660,
+        now,
+        0.18,
+        0.25
+    );
+
+    playTone(
+        880,
+        now + 0.2,
+        0.22,
+        0.30
+    );
+}
+
+
+/* =========================================================
+   SES BUTONU
+   ========================================================= */
+
+soundBtn.addEventListener(
+    "click",
+    () => {
+
+        soundEnabled =
+            !soundEnabled;
+
+        if(soundEnabled){
+
+            soundBtn.textContent =
+                "🔊 Ses Açık";
+
+            playTestSound();
+
+        }else{
+
+            soundBtn.textContent =
+                "🔇 Ses Kapalı";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   BİLDİRİMLER
+   ========================================================= */
+
+async function requestNotifications(){
+
+    if(
+        !("Notification" in window)
+    ){
+        return;
+    }
+
+    if(
+        Notification.permission ===
+        "default"
+    ){
+
+        try{
+
+            await Notification.requestPermission();
+
+        }catch(error){
+
+            console.log(
+                "Bildirim izni:",
+                error
+            );
+
+        }
+
+    }
+}
+
+
+notificationBtn.addEventListener(
+    "click",
+    async () => {
+
+        if(
+            !("Notification" in window)
+        ){
+
+            alert(
+                "Bu tarayıcı bildirimleri desteklemiyor."
+            );
+
+            return;
+        }
+
+        const permission =
+            await Notification.requestPermission();
+
+        if(
+            permission === "granted"
+        ){
+
+            notificationBtn.textContent =
+                "🔔 Bildirim Açık";
+
+            new Notification(
+                "Bursa Hızlı Teslimat",
+                {
+                    body:
+                        "Yeni sipariş bildirimleri aktif.",
+                    icon:
+                        "https://muhittin-16.github.io/bursa-hizli-teslimat/"
+                }
+            );
+
+        }else{
+
+            notificationBtn.textContent =
+                "🔕 Bildirim Kapalı";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   YENİ SİPARİŞ BİLDİRİMİ
+   ========================================================= */
+
+function notifyNewOrder(){
+
+    if(
+        !("Notification" in window)
+    ){
+        return;
+    }
+
+    if(
+        Notification.permission !==
+        "granted"
+    ){
+        return;
+    }
+
+    try{
+
+        new Notification(
+            "🚚 Yeni Teslimat Talebi",
+            {
+                body:
+                    "Bursa Hızlı Teslimat paneline yeni sipariş geldi.",
+                tag:
+                    "bursa-hizli-teslimat-new-order"
+            }
+        );
+
+    }catch(error){
+
+        console.log(
+            "Bildirim oluşturulamadı:",
+            error
+        );
+
+    }
+}
+
+
+/* =========================================================
+   TİTREŞİM
+   ========================================================= */
+
+function vibrateForNewOrder(){
+
+    if(
+        "vibrate" in navigator
+    ){
+
+        try{
+
+            navigator.vibrate([
+                200,
+                100,
+                300,
+                100,
+                500
+            ]);
+
+        }catch(_){}
+
+    }
+}
+
+
+/* =========================================================
+   YENİ SİPARİŞ ALERT
+   ========================================================= */
+
+function showNewOrderAlert(){
+
+    newOrderAlert.classList.add(
+        "show"
+    );
+
+    playNewOrderSound();
+
+    notifyNewOrder();
+
+    vibrateForNewOrder();
+}
+
+
+alertCloseBtn.addEventListener(
+    "click",
+    () => {
+
+        newOrderAlert.classList.remove(
+            "show"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   SİPARİŞLERİ YÜKLE
+   ========================================================= */
+
+async function loadOrders(){
+
+    dashboardMessage.textContent =
+        "Siparişler yükleniyor...";
+
+    const { data, error } =
+        await supabase
+            .from("teslimat_talepleri")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending:false
+                }
+            );
+
+    if(error){
+
+        console.error(error);
+
+        dashboardMessage.textContent =
+            "Siparişler yüklenemedi.";
+
+        return;
+
+    }
+
+    allOrders =
+        data || [];
+
+    const currentIds =
+        allOrders.map(
+            order => order.id
+        );
+
+    if(
+        !firstOrderLoad
+    ){
+
+        const newOrders =
+            currentIds.filter(
+                id =>
+                    !previousOrderIds.includes(
+                        id
+                    )
+            );
+
+        if(
+            newOrders.length > 0
+        ){
+
+            showNewOrderAlert();
+
+        }
+
+    }
+
+    previousOrderIds =
+        currentIds;
+
+    firstOrderLoad =
+        false;
+
+    updateStats();
+
+    renderOrders();
+
+    dashboardMessage.textContent =
+        `${allOrders.length} sipariş bulundu.`;
+}
+
+
+/* =========================================================
+   İSTATİSTİK
+   ========================================================= */
+
+function updateStats(){
+
+    const count =
+        (status) =>
+            allOrders.filter(
+                order =>
+                    order.durum === status
+            ).length;
+
+    document.getElementById(
+        "bekleyenCount"
+    ).textContent =
+        count("bekliyor");
+
+    document.getElementById(
+        "onaylananCount"
+    ).textContent =
+        count("onaylandi");
+
+    document.getElementById(
+        "kuryeCount"
+    ).textContent =
+        count("kurye_atandi");
+
+    document.getElementById(
+        "yoldaCount"
+    ).textContent =
+        count("yolda");
+
+    document.getElementById(
+        "tamamlananCount"
+    ).textContent =
+        count("teslim_edildi");
+}
+
+
+/* =========================================================
+   DURUM İSMİ
+   ========================================================= */
+
+function statusLabel(status){
+
+    const labels = {
+        bekliyor:
+            "Bekliyor",
+
+        onaylandi:
+            "Onaylandı",
+
+        kurye_atandi:
+            "Kurye Atandı",
+
+        yolda:
+            "Yolda",
+
+        teslim_edildi:
+            "Teslim Edildi",
+
+        iptal:
+            "İptal"
+    };
+
+    return labels[status] ||
+        status;
+}
+
+
+/* =========================================================
+   TARİH
+   ========================================================= */
+
+function formatDate(value){
+
+    if(!value){
+        return "-";
+    }
+
+    try{
+
+        return new Date(value)
+            .toLocaleString(
+                "tr-TR",
+                {
+                    dateStyle:"short",
+                    timeStyle:"short"
+                }
+            );
+
+    }catch(_){
+
+        return value;
+
+    }
+}
+
+
+/* =========================================================
+   HTML GÜVENLİĞİ
+   ========================================================= */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+/* =========================================================
+   SİPARİŞLERİ GÖSTER
+   ========================================================= */
+
+function renderOrders(){
+
+    let orders =
+        [...allOrders];
+
+    if(
+        currentFilter !== "all"
+    ){
+
+        orders =
+            orders.filter(
+                order =>
+                    order.durum ===
+                    currentFilter
+            );
+
+    }
+
+    if(!orders.length){
+
+        ordersContainer.innerHTML = `
+            <div class="empty-state">
+                <strong>📦 Sipariş bulunamadı</strong>
+                <span>
+                    Bu filtrede gösterilecek teslimat talebi yok.
+                </span>
+            </div>
+        `;
+
+        return;
+    }
+
+    ordersContainer.innerHTML =
+        orders.map(
+            order =>
+                createOrderCard(order)
+        ).join("");
+
+    attachOrderEvents();
+}
+
+
+/* =========================================================
+   SİPARİŞ KARTI
+   ========================================================= */
+
+function createOrderCard(order){
+
+    const status =
+        order.durum || "bekliyor";
+
+    const urgency =
+        order.aciliyet || "normal";
+
+    return `
+        <article
+            class="order-card"
+            data-order-id="${escapeHtml(order.id)}"
+        >
+
+            <div class="order-top">
+
+                <div class="order-title">
+
+                    <strong>
+                        ${escapeHtml(
+                            order.siparis_no ||
+                            "Sipariş"
+                        )}
+                    </strong>
+
+                    <small>
+                        ${formatDate(
+                            order.created_at
+                        )}
+                    </small>
+
+                </div>
+
+                <div class="order-status">
+                    ${escapeHtml(
+                        statusLabel(status)
+                    )}
+                </div>
+
+            </div>
+
+
+            <div class="order-grid">
+
+                <div class="order-info">
+
+                    <label>
+                        Müşteri
+                    </label>
+
+                    <div>
+                        ${escapeHtml(
+                            order.ad_soyad
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="order-info">
+
+                    <label>
+                        Telefon
+                    </label>
+
+                    <div>
+                        ${escapeHtml(
+                            order.telefon
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="order-info">
+
+                    <label>
+                        Paket
+                    </label>
+
+                    <div>
+                        ${escapeHtml(
+                            order.paket_tipi ||
+                            "Belirtilmedi"
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="order-info">
+
+                    <label>
+                        Aciliyet
+                    </label>
+
+                    <div>
+                        ${
+                            urgency === "acil"
+                                ? "⚡ Acil"
+                                : "Normal"
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="order-info full">
+
+                    <label>
+                        Alınacak Adres
+                    </label>
+
+                    <div>
+                        ${escapeHtml(
+                            order.alis_adresi
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="order-info full">
+
+                    <label>
+                        Teslim Adresi
+                    </label>
+
+                    <div>
+                        ${escapeHtml(
+                            order.teslimat_adresi
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="order-info full">
+
+                    <label>
+                        Paket Açıklaması
+                    </label>
+
+                    <div>
+                        ${escapeHtml(
+                            order.aciklama ||
+                            "Yok"
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="order-info full">
+
+                    <label>
+                        Ek Not
+                    </label>
+
+                    <div>
+                        ${escapeHtml(
+                            order.notlar ||
+                            "Yok"
+                        )}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="price-row">
+
+                <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="order-price"
+                    data-id="${escapeHtml(order.id)}"
+                    value="${
+                        order.fiyat ??
+                        ""
+                    }"
+                    placeholder="Teslimat fiyatı ₺"
+                >
+
+                <button
+                    type="button"
+                    class="save-price"
+                    data-id="${escapeHtml(order.id)}"
+                >
+                    💰 Fiyat Kaydet
+                </button>
+
+            </div>
+
+
+            <div class="order-actions">
+
+                <button
+                    class="status-button green status-action"
+                    data-id="${escapeHtml(order.id)}"
+                    data-status="onaylandi"
+                >
+                    ✓ Onayla
+                </button>
+
+                <button
+                    class="status-button status-action"
+                    data-id="${escapeHtml(order.id)}"
+                    data-status="kurye_atandi"
+                >
+                    🏍️ Kurye Ata
+                </button>
+
+                <button
+                    class="status-button status-action"
+                    data-id="${escapeHtml(order.id)}"
+                    data-status="yolda"
+                >
+                    🚚 Yola Çıktı
+                </button>
+
+                <button
+                    class="status-button green status-action"
+                    data-id="${escapeHtml(order.id)}"
+                    data-status="teslim_edildi"
+                >
+                    ✓ Teslim Edildi
+                </button>
+
+                <button
+                    class="status-button red status-action"
+                    data-id="${escapeHtml(order.id)}"
+                    data-status="iptal"
+                >
+                    ✕ İptal
+                </button>
+
+            </div>
+
+        </article>
+    `;
+}
+
+
+/* =========================================================
+   SİPARİŞ BUTONLARI
+   ========================================================= */
+
+function attachOrderEvents(){
+
+    document
+        .querySelectorAll(
+            ".status-action"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const id =
+                            button.dataset.id;
+
+                        const status =
+                            button.dataset.status;
+
+                        await updateOrderStatus(
+                            id,
+                            status
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".save-price"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const id =
+                            button.dataset.id;
+
+                        const input =
+                            document.querySelector(
+                                `.order-price[data-id="${id}"]`
+                            );
+
+                        const value =
+                            input?.value;
+
+                        await updateOrderPrice(
+                            id,
+                            value
+                        );
+
+                    }
+                );
+
+            }
+        );
+}
+
+
+/* =========================================================
+   DURUM GÜNCELLE
+   ========================================================= */
+
+async function updateOrderStatus(
+    id,
+    status
+){
+
+    const { error } =
+        await supabase
+            .from("teslimat_talepleri")
+            .update({
+                durum:status
+            })
+            .eq(
+                "id",
+                id
+            );
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Sipariş durumu güncellenemedi."
+        );
+
+        return;
+    }
+
+    await loadOrders();
+}
+
+
+/* =========================================================
+   FİYAT GÜNCELLE
+   ========================================================= */
+
+async function updateOrderPrice(
+    id,
+    value
+){
+
+    let price = null;
+
+    if(
+        value !== "" &&
+        value !== null &&
+        value !== undefined
+    ){
+
+        price =
+            Number(value);
+
+        if(
+            Number.isNaN(price) ||
+            price < 0
+        ){
+
+            alert(
+                "Geçerli bir fiyat girin."
+            );
+
+            return;
+        }
+
+    }
+
+    const { error } =
+        await supabase
+            .from("teslimat_talepleri")
+            .update({
+                fiyat:price
+            })
+            .eq(
+                "id",
+                id
+            );
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Fiyat kaydedilemedi."
+        );
+
+        return;
+    }
+
+    await loadOrders();
+}
+
+
+/* =========================================================
+   FİLTRELER
+   ========================================================= */
+
+document
+    .querySelectorAll(
+        ".filter-button"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    document
+                        .querySelectorAll(
+                            ".filter-button"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "active"
+                                )
+                        );
+
+                    button.classList.add(
+                        "active"
+                    );
+
+                    currentFilter =
+                        button.dataset.filter;
+
+                    renderOrders();
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   YENİLE
+   ========================================================= */
+
+refreshBtn.addEventListener(
+    "click",
+    async () => {
+
+        refreshBtn.disabled = true;
+
+        refreshBtn.textContent =
+            "⏳ Yükleniyor...";
+
+        await loadOrders();
+
+        refreshBtn.disabled = false;
+
+        refreshBtn.textContent =
+            "🔄 Yenile";
+    }
+);
+
+
+/* =========================================================
+   POLLING
+   5 SANİYEDE BİR
+   ========================================================= */
+
+function startPolling(){
+
+    stopPolling();
+
+    pollTimer =
+        setInterval(
+            async () => {
+
+                const {
+                    data
+                } =
+                    await supabase.auth
+                        .getUser();
+
+                if(
+                    data?.user
+                ){
+
+                    await loadOrders();
+
+                }
+
+            },
+            5000
+        );
+}
+
+
+function stopPolling(){
+
+    if(pollTimer){
+
+        clearInterval(
+            pollTimer
+        );
+
+        pollTimer = null;
+
+    }
+}
+
+
+/* =========================================================
+   ŞİFRE SIFIRLAMA
+   ========================================================= */
+
+forgotBtn.addEventListener(
+    "click",
+    async () => {
+
+        const email =
+            emailInput.value.trim();
+
+        if(!email){
+
+            showLoginMessage(
+                "Önce e-posta adresinizi girin."
+            );
+
+            emailInput.focus();
+
+            return;
+        }
+
+        try{
+
+            const { error } =
+                await supabase.auth
+                    .resetPasswordForEmail(
+                        email,
+                        {
+                            redirectTo:
+                                window.location.href
+                        }
+                    );
+
+            if(error){
+                throw error;
+            }
+
+            showLoginMessage(
+                "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.",
+                "success"
+            );
+
+        }catch(error){
+
+            console.error(error);
+
+            showLoginMessage(
+                error.message ||
+                "Şifre sıfırlama işlemi başarısız."
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ÇIKIŞ
+   ========================================================= */
+
+logoutBtn.addEventListener(
+    "click",
+    logout
+);
+
+
+/* =========================================================
+   SESSION KONTROLÜ
+   ========================================================= */
+
+async function checkExistingSession(){
+
+    const {
+        data
+    } =
+        await supabase.auth
+            .getSession();
+
+    const session =
+        data?.session;
+
+    if(!session){
+        return;
+    }
+
+    const admin =
+        await isAdmin(
+            session.user.id
+        );
+
+    if(!admin){
+
+        await supabase.auth.signOut();
+
+        return;
+    }
+
+    initAudio();
+
+    showAdminPanel();
+
+    await loadOrders();
+
+    startPolling();
+}
+
+
+/* =========================================================
+   AUTH DEĞİŞİKLİĞİ
+   ========================================================= */
+
+supabase.auth.onAuthStateChange(
+    (event, session) => {
+
+        console.log(
+            "Auth:",
+            event
+        );
+
+    }
+);
+
+
+/* =========================================================
+   BAŞLAT
+   ========================================================= */
+
+checkExistingSession();
+
+</script>
+
+</body>
+</html>
