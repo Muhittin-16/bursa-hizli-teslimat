@@ -241,7 +241,7 @@ button{
 }
 
 /* =========================================================
-   PANEL
+   PANEL HEADER
    ========================================================= */
 
 .admin-header{
@@ -542,17 +542,13 @@ button{
     word-break:break-word;
 }
 
-/* =========================================================
-   HİZMET BÖLGESİ
-   ========================================================= */
-
 .region-value{
     color:#83f0be!important;
     font-weight:800;
 }
 
 /* =========================================================
-   FİYAT
+   OTOMATİK FİYAT
    ========================================================= */
 
 .price-display{
@@ -770,7 +766,6 @@ button{
         align-items:flex-start;
         flex-direction:column;
     }
-
 }
 
 @media(max-width:480px){
@@ -807,7 +802,6 @@ button{
     .price-display strong{
         font-size:18px;
     }
-
 }
 
 </style>
@@ -2410,7 +2404,7 @@ function escapeHtml(value){
 
 
 /* =========================================================
-   TELEFON NUMARASINI LINK İÇİN TEMİZLE
+   TELEFON NUMARASI
    ========================================================= */
 
 function phoneHref(phone){
@@ -2692,7 +2686,7 @@ function createOrderCard(order){
             </div>
 
 
-            <!-- OTOMATİK FİYAT -->
+            <!-- MÜŞTERİNİN ÖDEDİĞİ / ÖDEYECEĞİ OTOMATİK ÜCRET -->
 
             <div class="price-display">
 
@@ -2705,7 +2699,7 @@ function createOrderCard(order){
                     <div>
 
                         <span class="price-display-label">
-                            Teslimat Ücreti
+                            Müşteri Teslimat Ücreti
                         </span>
 
                         <strong>
@@ -2717,7 +2711,7 @@ function createOrderCard(order){
                 </div>
 
                 <span class="price-auto">
-                    OTOMATİK FİYAT
+                    OTOMATİK
                 </span>
 
             </div>
@@ -2918,7 +2912,6 @@ refreshBtn.addEventListener(
 
 /* =========================================================
    POLLING
-   5 SANİYEDE BİR
    ========================================================= */
 
 function startPolling(){
@@ -3081,7 +3074,7 @@ async function checkExistingSession(){
 
 
 /* =========================================================
-   AUTH DEĞİŞİKLİĞİ
+   AUTH
    ========================================================= */
 
 supabase.auth.onAuthStateChange(
