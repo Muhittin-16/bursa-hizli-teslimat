@@ -314,6 +314,20 @@ button{
     color:#ff9b9b;
 }
 
+/* SES AKTİF UYARISI */
+
+.header-button.sound-ready{
+    border-color:rgba(25,195,125,.45);
+    color:#83f0be;
+    background:rgba(25,195,125,.10);
+}
+
+.header-button.sound-warning{
+    border-color:rgba(255,189,74,.45);
+    color:#ffd77c;
+    background:rgba(255,189,74,.10);
+}
+
 /* =========================================================
    CONTENT
    ========================================================= */
@@ -611,7 +625,7 @@ button{
 }
 
 /* =========================================================
-   MOBILE
+   MOBİL
    ========================================================= */
 
 @media(max-width:950px){
@@ -871,10 +885,10 @@ button{
 
             <button
                 id="soundBtn"
-                class="header-button"
+                class="header-button sound-warning"
                 type="button"
             >
-                🔊 Ses Açık
+                🔊 Sesi Etkinleştir
             </button>
 
             <button
@@ -1138,9 +1152,67 @@ let firstOrderLoad = true;
 
 let pollTimer = null;
 
-let soundEnabled = true;
-
 let audioContext = null;
+
+let audioUnlocked = false;
+
+let soundEnabled =
+    localStorage.getItem(
+        "bht_sound_enabled"
+    ) !== "false";
+
+let titleFlashTimer = null;
+
+
+/* =========================================================
+   SES BUTONU DURUMU
+   ========================================================= */
+
+function updateSoundButton(){
+
+    if(soundEnabled && audioUnlocked){
+
+        soundBtn.textContent =
+            "🔊 Ses Açık";
+
+        soundBtn.classList.remove(
+            "sound-warning"
+        );
+
+        soundBtn.classList.add(
+            "sound-ready"
+        );
+
+        return;
+    }
+
+    if(soundEnabled && !audioUnlocked){
+
+        soundBtn.textContent =
+            "🔊 Sesi Etkinleştir";
+
+        soundBtn.classList.remove(
+            "sound-ready"
+        );
+
+        soundBtn.classList.add(
+            "sound-warning"
+        );
+
+        return;
+    }
+
+    soundBtn.textContent =
+        "🔇 Ses Kapalı";
+
+    soundBtn.classList.remove(
+        "sound-ready"
+    );
+
+    soundBtn.classList.add(
+        "sound-warning"
+    );
+}
 
 
 /* =========================================================
@@ -1173,7 +1245,9 @@ async function isAdmin(userId){
             .maybeSingle();
 
     if(error){
+
         console.error(error);
+
         return false;
     }
 
@@ -1182,10 +1256,139 @@ async function isAdmin(userId){
 
 
 /* =========================================================
+   SES SİSTEMİNİ AÇ
+   ========================================================= */
+
+async function unlockAudio(){
+
+    try{
+
+        const AudioContextClass =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if(!AudioContextClass){
+
+            console.warn(
+                "Bu tarayıcı Web Audio API desteklemiyor."
+            );
+
+            return false;
+        }
+
+        if(!audioContext){
+
+            audioContext =
+                new AudioContextClass();
+
+        }
+
+        if(
+            audioContext.state ===
+            "suspended"
+        ){
+
+            await audioContext.resume();
+
+        }
+
+        /*
+         * Chrome/Edge bazı durumlarda AudioContext'i
+         * kullanıcı etkileşimi olmadan çalıştırmaz.
+         *
+         * Buradaki çok kısa ve neredeyse sessiz
+         * oscillator kullanıcı tıklaması sırasında
+         * ses motorunu gerçekten uyandırır.
+         */
+
+        const oscillator =
+            audioContext.createOscillator();
+
+        const gain =
+            audioContext.createGain();
+
+        oscillator.type =
+            "sine";
+
+        oscillator.frequency.setValueAtTime(
+            440,
+            audioContext.currentTime
+        );
+
+        gain.gain.setValueAtTime(
+            0.00001,
+            audioContext.currentTime
+        );
+
+        oscillator.connect(gain);
+
+        gain.connect(
+            audioContext.destination
+        );
+
+        oscillator.start();
+
+        oscillator.stop(
+            audioContext.currentTime + 0.03
+        );
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    40
+                )
+        );
+
+        if(
+            audioContext.state ===
+            "running"
+        ){
+
+            audioUnlocked = true;
+
+            updateSoundButton();
+
+            return true;
+        }
+
+    }catch(error){
+
+        console.error(
+            "Ses sistemi açılamadı:",
+            error
+        );
+
+    }
+
+    audioUnlocked = false;
+
+    updateSoundButton();
+
+    return false;
+}
+
+
+/* =========================================================
    LOGIN
    ========================================================= */
 
 async function login(){
+
+    /*
+     * ÖNEMLİ:
+     * Kullanıcının gerçek tıklaması sırasında
+     * ses sistemini açıyoruz.
+     *
+     * Böylece girişten sonra yeni sipariş
+     * geldiğinde tarayıcı sesi engellemez.
+     */
+
+    if(soundEnabled){
+
+        await unlockAudio();
+
+    }
 
     const email =
         emailInput.value.trim();
@@ -1203,6 +1406,7 @@ async function login(){
     }
 
     loginBtn.disabled = true;
+
     loginBtn.textContent =
         "⏳ Giriş yapılıyor...";
 
@@ -1215,17 +1419,21 @@ async function login(){
             });
 
         if(error){
+
             throw error;
         }
 
         if(!data.user){
+
             throw new Error(
                 "Kullanıcı bilgisi alınamadı."
             );
         }
 
         const admin =
-            await isAdmin(data.user.id);
+            await isAdmin(
+                data.user.id
+            );
 
         if(!admin){
 
@@ -1236,11 +1444,22 @@ async function login(){
             );
         }
 
-        initAudio();
+        /*
+         * Login butonu kullanıcı etkileşimi olduğu için
+         * ses burada zaten açılmış olur.
+         */
+
+        if(soundEnabled){
+
+            await unlockAudio();
+
+        }
 
         await requestNotifications();
 
         showAdminPanel();
+
+        updateSoundButton();
 
         await loadOrders();
 
@@ -1278,6 +1497,8 @@ function showAdminPanel(){
     adminApp.classList.remove(
         "hidden"
     );
+
+    updateSoundButton();
 }
 
 
@@ -1342,14 +1563,18 @@ passwordToggle.addEventListener(
    ========================================================= */
 
 [emailInput,passwordInput].forEach(
-    (input) => {
+    input => {
 
         input.addEventListener(
             "keydown",
-            (event) => {
+            event => {
 
-                if(event.key === "Enter"){
+                if(
+                    event.key === "Enter"
+                ){
+
                     login();
+
                 }
 
             }
@@ -1360,44 +1585,6 @@ passwordToggle.addEventListener(
 
 
 /* =========================================================
-   SES SİSTEMİ
-   ========================================================= */
-
-function initAudio(){
-
-    try{
-
-        if(!audioContext){
-
-            audioContext =
-                new (
-                    window.AudioContext ||
-                    window.webkitAudioContext
-                )();
-
-        }
-
-        if(
-            audioContext.state ===
-            "suspended"
-        ){
-
-            audioContext.resume();
-
-        }
-
-    }catch(error){
-
-        console.error(
-            "Ses sistemi:",
-            error
-        );
-
-    }
-}
-
-
-/* =========================================================
    TEK TON
    ========================================================= */
 
@@ -1405,10 +1592,20 @@ function playTone(
     frequency,
     startTime,
     duration,
-    volume = 0.32
+    volume = 0.32,
+    type = "sine"
 ){
 
     if(!audioContext){
+
+        return;
+    }
+
+    if(
+        audioContext.state !==
+        "running"
+    ){
+
         return;
     }
 
@@ -1419,7 +1616,7 @@ function playTone(
         audioContext.createGain();
 
     oscillator.type =
-        "sine";
+        type;
 
     oscillator.frequency.setValueAtTime(
         frequency,
@@ -1427,7 +1624,7 @@ function playTone(
     );
 
     gain.gain.setValueAtTime(
-        0.001,
+        0.0001,
         startTime
     );
 
@@ -1437,11 +1634,12 @@ function playTone(
     );
 
     gain.gain.exponentialRampToValueAtTime(
-        0.001,
+        0.0001,
         startTime + duration
     );
 
     oscillator.connect(gain);
+
     gain.connect(
         audioContext.destination
     );
@@ -1451,7 +1649,7 @@ function playTone(
     );
 
     oscillator.stop(
-        startTime + duration + 0.03
+        startTime + duration + 0.04
     );
 }
 
@@ -1463,44 +1661,95 @@ function playTone(
 function playNewOrderSound(){
 
     if(!soundEnabled){
+
         return;
     }
 
-    initAudio();
+    if(
+        !audioContext ||
+        !audioUnlocked
+    ){
 
-    if(!audioContext){
+        console.warn(
+            "Yeni sipariş sesi için ses sistemi aktif değil."
+        );
+
+        return;
+    }
+
+    if(
+        audioContext.state !==
+        "running"
+    ){
+
         return;
     }
 
     const now =
-        audioContext.currentTime;
+        audioContext.currentTime + 0.03;
+
+    /*
+     * Belirgin 5 aşamalı teslimat zili.
+     */
 
     playTone(
-        660,
+        784,
         now,
-        0.22,
-        0.38
+        0.18,
+        0.42,
+        "sine"
     );
 
     playTone(
-        880,
-        now + 0.23,
-        0.22,
-        0.42
+        988,
+        now + 0.20,
+        0.18,
+        0.46,
+        "sine"
     );
 
     playTone(
-        1046,
-        now + 0.46,
-        0.30,
-        0.45
+        1174,
+        now + 0.40,
+        0.25,
+        0.50,
+        "sine"
     );
 
     playTone(
-        880,
-        now + 0.82,
+        988,
+        now + 0.70,
+        0.18,
+        0.44,
+        "sine"
+    );
+
+    playTone(
+        1174,
+        now + 0.92,
+        0.32,
+        0.50,
+        "sine"
+    );
+
+    /*
+     * İkinci kısa zil.
+     */
+
+    playTone(
+        659,
+        now + 1.35,
+        0.18,
+        0.35,
+        "triangle"
+    );
+
+    playTone(
+        784,
+        now + 1.55,
         0.28,
-        0.40
+        0.42,
+        "triangle"
     );
 }
 
@@ -1511,27 +1760,39 @@ function playNewOrderSound(){
 
 function playTestSound(){
 
-    initAudio();
+    if(
+        !audioContext ||
+        !audioUnlocked
+    ){
 
-    if(!audioContext){
         return;
     }
 
     const now =
-        audioContext.currentTime;
+        audioContext.currentTime + 0.03;
 
     playTone(
-        660,
+        659,
         now,
-        0.18,
-        0.25
+        0.16,
+        0.28,
+        "sine"
     );
 
     playTone(
-        880,
-        now + 0.2,
-        0.22,
-        0.30
+        784,
+        now + 0.18,
+        0.16,
+        0.32,
+        "sine"
+    );
+
+    playTone(
+        988,
+        now + 0.36,
+        0.24,
+        0.38,
+        "sine"
     );
 }
 
@@ -1542,24 +1803,69 @@ function playTestSound(){
 
 soundBtn.addEventListener(
     "click",
-    () => {
+    async () => {
 
-        soundEnabled =
-            !soundEnabled;
+        /*
+         * SES KAPALIYSA:
+         * kullanıcı tıklamasıyla tekrar aç.
+         */
 
-        if(soundEnabled){
+        if(!soundEnabled){
 
-            soundBtn.textContent =
-                "🔊 Ses Açık";
+            soundEnabled = true;
 
-            playTestSound();
+            localStorage.setItem(
+                "bht_sound_enabled",
+                "true"
+            );
 
-        }else{
+            const unlocked =
+                await unlockAudio();
 
-            soundBtn.textContent =
-                "🔇 Ses Kapalı";
+            if(unlocked){
 
+                playTestSound();
+
+            }
+
+            updateSoundButton();
+
+            return;
         }
+
+        /*
+         * SES AÇIK AMA HENÜZ TARAYICIYA
+         * TANITILMAMIŞSA:
+         */
+
+        if(!audioUnlocked){
+
+            const unlocked =
+                await unlockAudio();
+
+            if(unlocked){
+
+                playTestSound();
+
+            }
+
+            updateSoundButton();
+
+            return;
+        }
+
+        /*
+         * SES AÇIKSA KAPAT.
+         */
+
+        soundEnabled = false;
+
+        localStorage.setItem(
+            "bht_sound_enabled",
+            "false"
+        );
+
+        updateSoundButton();
 
     }
 );
@@ -1574,6 +1880,7 @@ async function requestNotifications(){
     if(
         !("Notification" in window)
     ){
+
         return;
     }
 
@@ -1594,6 +1901,49 @@ async function requestNotifications(){
             );
 
         }
+
+    }
+
+    updateNotificationButton();
+}
+
+
+/* =========================================================
+   BİLDİRİM BUTONU DURUMU
+   ========================================================= */
+
+function updateNotificationButton(){
+
+    if(
+        !("Notification" in window)
+    ){
+
+        notificationBtn.textContent =
+            "🔕 Bildirim Yok";
+
+        return;
+    }
+
+    if(
+        Notification.permission ===
+        "granted"
+    ){
+
+        notificationBtn.textContent =
+            "🔔 Bildirim Açık";
+
+    }else if(
+        Notification.permission ===
+        "denied"
+    ){
+
+        notificationBtn.textContent =
+            "🔕 Bildirim Kapalı";
+
+    }else{
+
+        notificationBtn.textContent =
+            "🔔 Bildirim";
 
     }
 }
@@ -1617,27 +1967,38 @@ notificationBtn.addEventListener(
         const permission =
             await Notification.requestPermission();
 
+        updateNotificationButton();
+
         if(
             permission === "granted"
         ){
 
-            notificationBtn.textContent =
-                "🔔 Bildirim Açık";
+            try{
 
-            new Notification(
-                "Bursa Hızlı Teslimat",
-                {
-                    body:
-                        "Yeni sipariş bildirimleri aktif.",
-                    icon:
-                        "https://muhittin-16.github.io/bursa-hizli-teslimat/"
-                }
+                new Notification(
+                    "Bursa Hızlı Teslimat",
+                    {
+                        body:
+                            "Yeni sipariş bildirimleri aktif."
+                    }
+                );
+
+            }catch(error){
+
+                console.log(
+                    "Test bildirimi:",
+                    error
+                );
+
+            }
+
+        }else if(
+            permission === "denied"
+        ){
+
+            alert(
+                "Bildirim izni kapalı. Tarayıcı ayarlarından bildirimlere izin vermeniz gerekir."
             );
-
-        }else{
-
-            notificationBtn.textContent =
-                "🔕 Bildirim Kapalı";
 
         }
 
@@ -1654,6 +2015,7 @@ function notifyNewOrder(){
     if(
         !("Notification" in window)
     ){
+
         return;
     }
 
@@ -1661,6 +2023,7 @@ function notifyNewOrder(){
         Notification.permission !==
         "granted"
     ){
+
         return;
     }
 
@@ -1714,6 +2077,60 @@ function vibrateForNewOrder(){
 
 
 /* =========================================================
+   BAŞLIK UYARISI
+   ========================================================= */
+
+function flashBrowserTitle(){
+
+    if(titleFlashTimer){
+
+        clearInterval(
+            titleFlashTimer
+        );
+
+    }
+
+    const originalTitle =
+        "Bursa Hızlı Teslimat | Yönetim Paneli";
+
+    let visible = false;
+
+    let count = 0;
+
+    titleFlashTimer =
+        setInterval(
+            () => {
+
+                document.title =
+                    visible
+                        ? "🚨 YENİ SİPARİŞ!"
+                        : originalTitle;
+
+                visible =
+                    !visible;
+
+                count++;
+
+                if(count >= 10){
+
+                    clearInterval(
+                        titleFlashTimer
+                    );
+
+                    titleFlashTimer = null;
+
+                    document.title =
+                        originalTitle;
+
+                }
+
+            },
+            700
+        );
+}
+
+
+/* =========================================================
    YENİ SİPARİŞ ALERT
    ========================================================= */
 
@@ -1723,11 +2140,25 @@ function showNewOrderAlert(){
         "show"
     );
 
+    /*
+     * Ses
+     */
     playNewOrderSound();
 
+    /*
+     * Tarayıcı bildirimi
+     */
     notifyNewOrder();
 
+    /*
+     * Telefon/tablet titreşimi
+     */
     vibrateForNewOrder();
+
+    /*
+     * Tarayıcı sekmesinde uyarı
+     */
+    flashBrowserTitle();
 }
 
 
@@ -1782,6 +2213,13 @@ async function loadOrders(){
             order => order.id
         );
 
+    /*
+     * İlk yüklemede ses çalmıyor.
+     *
+     * Sonraki kontrollerde daha önce görülmeyen
+     * sipariş varsa yeni sipariş olarak kabul ediliyor.
+     */
+
     if(
         !firstOrderLoad
     ){
@@ -1826,7 +2264,7 @@ async function loadOrders(){
 function updateStats(){
 
     const count =
-        (status) =>
+        status =>
             allOrders.filter(
                 order =>
                     order.durum === status
@@ -1866,6 +2304,7 @@ function updateStats(){
 function statusLabel(status){
 
     const labels = {
+
         bekliyor:
             "Bekliyor",
 
@@ -1883,6 +2322,7 @@ function statusLabel(status){
 
         iptal:
             "İptal"
+
     };
 
     return labels[status] ||
@@ -1897,6 +2337,7 @@ function statusLabel(status){
 function formatDate(value){
 
     if(!value){
+
         return "-";
     }
 
@@ -1914,7 +2355,6 @@ function formatDate(value){
     }catch(_){
 
         return value;
-
     }
 }
 
@@ -1926,11 +2366,26 @@ function formatDate(value){
 function escapeHtml(value){
 
     return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
@@ -1971,10 +2426,12 @@ function renderOrders(){
     }
 
     ordersContainer.innerHTML =
-        orders.map(
-            order =>
-                createOrderCard(order)
-        ).join("");
+        orders
+            .map(
+                order =>
+                    createOrderCard(order)
+            )
+            .join("");
 
     attachOrderEvents();
 }
@@ -1987,10 +2444,12 @@ function renderOrders(){
 function createOrderCard(order){
 
     const status =
-        order.durum || "bekliyor";
+        order.durum ||
+        "bekliyor";
 
     const urgency =
-        order.aciliyet || "normal";
+        order.aciliyet ||
+        "normal";
 
     return `
         <article
@@ -2164,8 +2623,7 @@ function createOrderCard(order){
                     class="order-price"
                     data-id="${escapeHtml(order.id)}"
                     value="${
-                        order.fiyat ??
-                        ""
+                        order.fiyat ?? ""
                     }"
                     placeholder="Teslimat fiyatı ₺"
                 >
@@ -2456,6 +2914,7 @@ refreshBtn.addEventListener(
 
         refreshBtn.textContent =
             "🔄 Yenile";
+
     }
 );
 
@@ -2542,6 +3001,7 @@ forgotBtn.addEventListener(
                     );
 
             if(error){
+
                 throw error;
             }
 
@@ -2591,6 +3051,11 @@ async function checkExistingSession(){
         data?.session;
 
     if(!session){
+
+        updateSoundButton();
+
+        updateNotificationButton();
+
         return;
     }
 
@@ -2606,9 +3071,20 @@ async function checkExistingSession(){
         return;
     }
 
-    initAudio();
+    /*
+     * Eğer oturum zaten açıksa tarayıcı ses için
+     * yeni kullanıcı tıklaması isteyebilir.
+     *
+     * Bu nedenle panel açılır ve kullanıcıdan
+     * sadece bir kez "Sesi Etkinleştir" düğmesine
+     * basması beklenir.
+     */
 
     showAdminPanel();
+
+    updateSoundButton();
+
+    updateNotificationButton();
 
     await loadOrders();
 
@@ -2635,6 +3111,10 @@ supabase.auth.onAuthStateChange(
 /* =========================================================
    BAŞLAT
    ========================================================= */
+
+updateSoundButton();
+
+updateNotificationButton();
 
 checkExistingSession();
 
