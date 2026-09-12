@@ -1,14 +1,14 @@
 /* ============================================================
    BURSA HIZLI TESLİMAT
    script.js
-   Gerçek Supabase teslimat sistemi + WhatsApp + kullanıcı işlemleri
+   Mobil teslimat sistemi + Supabase + WhatsApp
    ============================================================ */
 
 (() => {
   "use strict";
 
   /* ============================================================
-     SUPABASE AYARLARI
+     AYARLAR
      ============================================================ */
 
   const SUPABASE_URL =
@@ -23,93 +23,447 @@
   let supabase = null;
 
   /* ============================================================
-     YARDIMCI FONKSİYONLAR
+     YARDIMCI SEÇİCİLER
      ============================================================ */
 
-  const $ = (selector, root = document) => {
-    return root.querySelector(selector);
-  };
-
-  const $$ = (selector, root = document) => {
-    return [...root.querySelectorAll(selector)];
-  };
-
-  const clean = (value) => {
-    return String(value || "").trim();
-  };
+  const $ = (selector) => document.querySelector(selector);
 
   /* ============================================================
      SUPABASE BAĞLANTISI
      ============================================================ */
 
   async function initSupabase() {
+    if (supabase) {
+      return supabase;
+    }
+
     try {
       const module = await import(
         "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
       );
 
-      if (!module || !module.createClient) {
-        throw new Error(
-          "Supabase kütüphanesi yüklenemedi."
-        );
-      }
-
       supabase = module.createClient(
         SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false
+          }
+        }
       );
 
-      console.log(
-        "✅ Supabase bağlantısı hazır."
-      );
-
-      return true;
-
+      return supabase;
     } catch (error) {
-      console.error(
-        "❌ Supabase bağlantı hatası:",
-        error
-      );
-
-      return false;
+      console.error("Supabase bağlantı hatası:", error);
+      throw error;
     }
   }
 
   /* ============================================================
-     SAYFA YÜKLENDİĞİNDE
+     TELEFON
      ============================================================ */
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+  function cleanPhone(value) {
+    return String(value || "").replace(/\D/g, "");
+  }
 
-      await initSupabase();
+  function isValidTurkishPhone(value) {
+    let digits = cleanPhone(value);
 
-      initSmoothScroll();
-      initDeliveryForm();
-      initPhoneFormatting();
-      initHeaderScroll();
-      initRevealAnimations();
-      initContactLinks();
+    if (digits.startsWith("90")) {
+      digits = "0" + digits.substring(2);
     }
-  );
+
+    if (!digits.startsWith("0")) {
+      digits = "0" + digits;
+    }
+
+    return /^05\d{9}$/.test(digits);
+  }
+
+  function formatTurkishPhone(value) {
+    let digits = cleanPhone(value);
+
+    if (digits.startsWith("90") && digits.length === 12) {
+      digits = "0" + digits.substring(2);
+    }
+
+    if (digits.length > 11) {
+      digits = digits.substring(0, 11);
+    }
+
+    if (!digits) {
+      return "";
+    }
+
+    let result = digits.substring(0, 4);
+
+    if (digits.length > 4) {
+      result += " " + digits.substring(4, 7);
+    }
+
+    if (digits.length > 7) {
+      result += " " + digits.substring(7, 9);
+    }
+
+    if (digits.length > 9) {
+      result += " " + digits.substring(9, 11);
+    }
+
+    return result;
+  }
 
   /* ============================================================
-     YUMUŞAK KAYDIRMA
+     SİPARİŞ NUMARASI
+     ÖNEMLİ:
+     Artık INSERT sonrası SELECT yapılmıyor.
+     Bu sayede anonim mobil kullanıcı sipariş oluşturabiliyor.
      ============================================================ */
 
-  function initSmoothScroll() {
+  function generateOrderNumber() {
+    try {
+      const array = new Uint8Array(4);
+      crypto.getRandomValues(array);
 
-    const links = $$(
-      'a[href^="#"]'
+      const randomPart = Array.from(array)
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase();
+
+      return "BHT-" + randomPart;
+    } catch (error) {
+      const randomPart = Math.random()
+        .toString(16)
+        .substring(2, 10)
+        .toUpperCase();
+
+      return "BHT-" + randomPart;
+    }
+  }
+
+  /* ============================================================
+     WHATSAPP
+     ============================================================ */
+
+  function buildWhatsAppMessage(data) {
+    return [
+      "🚚 BURSA HIZLI TESLİMAT",
+      "",
+      "📦 YENİ TESLİMAT TALEBİ",
+      "",
+      `🔢 Sipariş No: ${data.siparis_no}`,
+      `👤 Ad Soyad: ${data.ad_soyad}`,
+      `📞 Telefon: ${data.telefon}`,
+      "",
+      `📍 Alınacak Adres:`,
+      data.alis_adresi,
+      "",
+      `🏁 Teslim Edilecek Adres:`,
+      data.teslimat_adresi,
+      "",
+      `📦 Paket Türü: ${data.paket_tipi || "Belirtilmedi"}`,
+      `⚡ Aciliyet: ${data.aciliyet || "Normal"}`,
+      "",
+      `📝 Açıklama: ${data.aciklama || "Yok"}`,
+      `💬 Ek Not: ${data.notlar || "Yok"}`,
+      "",
+      "Lütfen teslimat talebini kontrol ediniz."
+    ].join("\n");
+  }
+
+  function openWhatsApp(data) {
+    const message = buildWhatsAppMessage(data);
+
+    const url =
+      `https://wa.me/${WHATSAPP_NUMBER}?text=` +
+      encodeURIComponent(message);
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  /* ============================================================
+     FORM MESAJI
+     ============================================================ */
+
+  function showFormMessage(message, type = "success") {
+    const element = $("#formMessage");
+
+    if (!element) {
+      return;
+    }
+
+    element.textContent = message;
+    element.classList.add("show");
+
+    if (type === "error") {
+      element.style.background = "rgba(255,98,98,.10)";
+      element.style.borderColor = "rgba(255,98,98,.30)";
+      element.style.color = "#ff9b9b";
+    } else {
+      element.style.background = "rgba(25,195,125,.10)";
+      element.style.borderColor = "rgba(25,195,125,.30)";
+      element.style.color = "#83f0be";
+    }
+  }
+
+  /* ============================================================
+     TESLİMAT FORMU
+     ============================================================ */
+
+  async function handleDeliverySubmit(event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+
+    const name = $("#name")?.value.trim() || "";
+    const phoneRaw = $("#phone")?.value.trim() || "";
+    const pickup = $("#pickup")?.value.trim() || "";
+    const delivery = $("#delivery")?.value.trim() || "";
+    const packageType = $("#packageType")?.value || "";
+    const urgency = $("#urgency")?.value || "Normal";
+    const description = $("#description")?.value.trim() || "";
+    const note = $("#note")?.value.trim() || "";
+
+    /* -----------------------------
+       VALIDASYON
+       ----------------------------- */
+
+    if (name.length < 2) {
+      showFormMessage(
+        "Lütfen ad ve soyad bilgilerinizi girin.",
+        "error"
+      );
+      $("#name")?.focus();
+      return;
+    }
+
+    if (!isValidTurkishPhone(phoneRaw)) {
+      showFormMessage(
+        "Lütfen geçerli bir Türkiye cep telefonu numarası girin.",
+        "error"
+      );
+      $("#phone")?.focus();
+      return;
+    }
+
+    if (pickup.length < 5) {
+      showFormMessage(
+        "Lütfen alınacak adresi eksiksiz girin.",
+        "error"
+      );
+      $("#pickup")?.focus();
+      return;
+    }
+
+    if (delivery.length < 5) {
+      showFormMessage(
+        "Lütfen teslim edilecek adresi eksiksiz girin.",
+        "error"
+      );
+      $("#delivery")?.focus();
+      return;
+    }
+
+    const phone = formatTurkishPhone(phoneRaw);
+
+    /* -----------------------------
+       BUTON
+       ----------------------------- */
+
+    const submitButton = form.querySelector(
+      'button[type="submit"]'
     );
 
-    links.forEach((link) => {
+    const originalButtonText = submitButton
+      ? submitButton.innerHTML
+      : "";
 
-      link.addEventListener(
-        "click",
-        (event) => {
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.innerHTML = "⏳ Talep Oluşturuluyor...";
+      submitButton.style.opacity = "0.7";
+      submitButton.style.pointerEvents = "none";
+    }
 
+    try {
+      showFormMessage("Teslimat talebiniz kaydediliyor...");
+
+      const client = await initSupabase();
+
+      /* -----------------------------
+         SİPARİŞ NUMARASI CLIENT'TA ÜRETİLİYOR
+         ----------------------------- */
+
+      const siparisNo = generateOrderNumber();
+
+      const payload = {
+        siparis_no: siparisNo,
+        ad_soyad: name,
+        telefon: phone,
+        alis_adresi: pickup,
+        teslimat_adresi: delivery,
+        paket_tipi: packageType || null,
+        aciliyet:
+          urgency.toLowerCase() === "acil"
+            ? "acil"
+            : "normal",
+        aciklama: description || null,
+        notlar: note || null,
+        durum: "bekliyor"
+      };
+
+      /* ========================================================
+         ÇOK ÖNEMLİ DÜZELTME
+
+         ESKİ:
+         insert(...).select(...).single()
+
+         YENİ:
+         sadece INSERT
+
+         Böylece anonim mobil kullanıcıdan SELECT yetkisi
+         istemiyoruz.
+         ======================================================== */
+
+      const { error } = await client
+        .from("teslimat_talepleri")
+        .insert([payload]);
+
+      if (error) {
+        console.error("Teslimat kayıt hatası:", error);
+        throw error;
+      }
+
+      /* -----------------------------
+         BAŞARILI
+         ----------------------------- */
+
+      showFormMessage(
+        `✅ Talebiniz oluşturuldu. Sipariş Numaranız: ${siparisNo}`
+      );
+
+      /* -----------------------------
+         WHATSAPP
+         ----------------------------- */
+
+      openWhatsApp(payload);
+
+      /* -----------------------------
+         FORM TEMİZLE
+         ----------------------------- */
+
+      form.reset();
+
+      /* -----------------------------
+         BUTON
+         ----------------------------- */
+
+      if (submitButton) {
+        submitButton.innerHTML = "✅ Talep Oluşturuldu";
+      }
+
+      setTimeout(() => {
+        if (submitButton) {
+          submitButton.innerHTML = originalButtonText;
+          submitButton.disabled = false;
+          submitButton.style.opacity = "";
+          submitButton.style.pointerEvents = "";
+        }
+      }, 3500);
+
+    } catch (error) {
+      console.error(error);
+
+      showFormMessage(
+        "Teslimat talebi kaydedilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
+        "error"
+      );
+
+      if (submitButton) {
+        submitButton.innerHTML = originalButtonText;
+        submitButton.disabled = false;
+        submitButton.style.opacity = "";
+        submitButton.style.pointerEvents = "";
+      }
+    }
+  }
+
+  /* ============================================================
+     TELEFON ALANI FORMATLAMA
+     ============================================================ */
+
+  function setupPhoneFormatting() {
+    const phoneInput = $("#phone");
+
+    if (!phoneInput) {
+      return;
+    }
+
+    phoneInput.addEventListener("input", () => {
+      const cursorPosition = phoneInput.selectionStart;
+
+      phoneInput.value = formatTurkishPhone(
+        phoneInput.value
+      );
+
+      if (
+        document.activeElement === phoneInput &&
+        cursorPosition !== null
+      ) {
+        try {
+          phoneInput.setSelectionRange(
+            phoneInput.value.length,
+            phoneInput.value.length
+          );
+        } catch (_) {}
+      }
+    });
+  }
+
+  /* ============================================================
+     FORM
+     ============================================================ */
+
+  function setupDeliveryForm() {
+    const form = $("#deliveryForm");
+
+    if (!form) {
+      return;
+    }
+
+    form.addEventListener(
+      "submit",
+      handleDeliverySubmit
+    );
+  }
+
+  /* ============================================================
+     WHATSAPP / TELEFON LINKLERİ
+     ============================================================ */
+
+  function setupContactLinks() {
+    document.querySelectorAll('a[href^="tel:"]').forEach(
+      (link) => {
+        link.addEventListener("click", () => {
+          console.log(
+            "Telefon aranıyor:",
+            BUSINESS_PHONE
+          );
+        });
+      }
+    );
+  }
+
+  /* ============================================================
+     SMOOTH SCROLL
+     ============================================================ */
+
+  function setupSmoothScroll() {
+    document
+      .querySelectorAll('a[href^="#"]')
+      .forEach((link) => {
+        link.addEventListener("click", (event) => {
           const targetId =
             link.getAttribute("href");
 
@@ -121,9 +475,7 @@
           }
 
           const target =
-            document.querySelector(
-              targetId
-            );
+            document.querySelector(targetId);
 
           if (!target) {
             return;
@@ -135,802 +487,133 @@
             behavior: "smooth",
             block: "start"
           });
-
-          document.body.classList.remove(
-            "menu-open"
-          );
-        }
-      );
-    });
-  }
-
-  /* ============================================================
-     TESLİMAT FORMU
-     ============================================================ */
-
-  function initDeliveryForm() {
-
-    const form =
-      $("#deliveryForm");
-
-    if (!form) {
-      return;
-    }
-
-    form.addEventListener(
-      "submit",
-      async (event) => {
-
-        event.preventDefault();
-
-        clearFormMessage();
-
-        /* ------------------------------------------------------
-           SUPABASE HAZIR MI?
-           ------------------------------------------------------ */
-
-        if (!supabase) {
-
-          showFormMessage(
-            "Sistem bağlantısı hazırlanamadı. Lütfen sayfayı yenileyip tekrar deneyin.",
-            "error"
-          );
-
-          return;
-        }
-
-        /* ------------------------------------------------------
-           FORM VERİLERİ
-           ------------------------------------------------------ */
-
-        const name =
-          clean($("#name")?.value);
-
-        const phone =
-          clean($("#phone")?.value);
-
-        const pickup =
-          clean($("#pickup")?.value);
-
-        const delivery =
-          clean($("#delivery")?.value);
-
-        const packageType =
-          clean($("#packageType")?.value);
-
-        const urgency =
-          clean($("#urgency")?.value) ||
-          "Normal";
-
-        const description =
-          clean($("#description")?.value);
-
-        const note =
-          clean($("#note")?.value);
-
-        /* ------------------------------------------------------
-           ZORUNLU ALAN KONTROLLERİ
-           ------------------------------------------------------ */
-
-        if (!name) {
-
-          showFormMessage(
-            "Lütfen adınızı ve soyadınızı yazın.",
-            "error"
-          );
-
-          focusField("#name");
-          return;
-        }
-
-        if (!phone) {
-
-          showFormMessage(
-            "Lütfen telefon numaranızı yazın.",
-            "error"
-          );
-
-          focusField("#phone");
-          return;
-        }
-
-        if (!isValidTurkishPhone(phone)) {
-
-          showFormMessage(
-            "Lütfen geçerli bir telefon numarası girin.",
-            "error"
-          );
-
-          focusField("#phone");
-          return;
-        }
-
-        if (!pickup) {
-
-          showFormMessage(
-            "Lütfen paketin alınacağı adresi yazın.",
-            "error"
-          );
-
-          focusField("#pickup");
-          return;
-        }
-
-        if (!delivery) {
-
-          showFormMessage(
-            "Lütfen paketin teslim edileceği adresi yazın.",
-            "error"
-          );
-
-          focusField("#delivery");
-          return;
-        }
-
-        /* ------------------------------------------------------
-           BUTONU KİLİTLE
-           ------------------------------------------------------ */
-
-        const submitButton =
-          form.querySelector(
-            'button[type="submit"], input[type="submit"]'
-          );
-
-        const originalButtonText =
-          submitButton
-            ? submitButton.innerHTML
-            : "";
-
-        if (submitButton) {
-
-          submitButton.disabled = true;
-
-          submitButton.innerHTML =
-            "⏳ Talep oluşturuluyor...";
-        }
-
-        showFormMessage(
-          "Teslimat talebiniz sisteme kaydediliyor...",
-          "success"
-        );
-
-        try {
-
-          /* ----------------------------------------------------
-             TELEFONU TEMİZLE
-             ---------------------------------------------------- */
-
-          const cleanPhone =
-            phone.replace(
-              /\D/g,
-              ""
-            );
-
-          /* ----------------------------------------------------
-             SUPABASE'E GERÇEK KAYIT
-             ---------------------------------------------------- */
-
-          const {
-            data,
-            error
-          } = await supabase
-            .from("teslimat_talepleri")
-            .insert([
-              {
-                ad_soyad: name,
-
-                telefon: cleanPhone,
-
-                alis_adresi: pickup,
-
-                teslimat_adresi: delivery,
-
-                paket_tipi:
-                  packageType || null,
-
-                aciliyet:
-                  urgency || "Normal",
-
-                aciklama:
-                  description || null,
-
-                notlar:
-                  note || null,
-
-                durum:
-                  "bekliyor"
-              }
-            ])
-            .select(
-              "id, siparis_no, created_at"
-            )
-            .single();
-
-          /* ----------------------------------------------------
-             SUPABASE HATASI
-             ---------------------------------------------------- */
-
-          if (error) {
-
-            console.error(
-              "Supabase kayıt hatası:",
-              error
-            );
-
-            showFormMessage(
-              "Teslimat talebi kaydedilemedi. Lütfen tekrar deneyin.",
-              "error"
-            );
-
-            return;
-          }
-
-          /* ----------------------------------------------------
-             SİPARİŞ NUMARASI
-             ---------------------------------------------------- */
-
-          const orderNumber =
-            data?.siparis_no ||
-            "BHT-" +
-              String(
-                data?.id || ""
-              ).substring(0, 8);
-
-          /* ----------------------------------------------------
-             WHATSAPP MESAJI
-             ---------------------------------------------------- */
-
-          const message =
-            buildWhatsAppMessage({
-              name,
-              phone,
-              pickup,
-              delivery,
-              packageType,
-              urgency,
-              description,
-              note,
-              orderNumber
-            });
-
-          const whatsappUrl =
-            `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-              message
-            )}`;
-
-          /* ----------------------------------------------------
-             BAŞARILI MESAJ
-             ---------------------------------------------------- */
-
-          showFormMessage(
-            `✅ Talebiniz başarıyla oluşturuldu. Sipariş Numaranız: ${orderNumber}`,
-            "success"
-          );
-
-          /* ----------------------------------------------------
-             FORMU TEMİZLE
-             ---------------------------------------------------- */
-
-          form.reset();
-
-          /* ----------------------------------------------------
-             WHATSAPP'I AÇ
-             ---------------------------------------------------- */
-
-          setTimeout(() => {
-
-            try {
-
-              window.open(
-                whatsappUrl,
-                "_blank",
-                "noopener,noreferrer"
-              );
-
-            } catch (whatsappError) {
-
-              console.warn(
-                "WhatsApp açılamadı:",
-                whatsappError
-              );
-            }
-
-          }, 500);
-
-        } catch (error) {
-
-          console.error(
-            "Beklenmeyen teslimat hatası:",
-            error
-          );
-
-          showFormMessage(
-            "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
-            "error"
-          );
-
-        } finally {
-
-          /* ----------------------------------------------------
-             BUTONU TEKRAR AKTİFLEŞTİR
-             ---------------------------------------------------- */
-
-          if (submitButton) {
-
-            submitButton.disabled = false;
-
-            submitButton.innerHTML =
-              originalButtonText ||
-              "🚀 Teslimat Talebi Oluştur";
-          }
-        }
-      }
-    );
-  }
-
-  /* ============================================================
-     WHATSAPP MESAJI OLUŞTUR
-     ============================================================ */
-
-  function buildWhatsAppMessage(data) {
-
-    const {
-      name,
-      phone,
-      pickup,
-      delivery,
-      packageType,
-      urgency,
-      description,
-      note,
-      orderNumber
-    } = data;
-
-    let message = "";
-
-    message +=
-      "🏍️ BURSA HIZLI TESLİMAT\n";
-
-    message +=
-      "📦 YENİ TESLİMAT TALEBİ\n";
-
-    message +=
-      "━━━━━━━━━━━━━━━━━━━━\n\n";
-
-    if (orderNumber) {
-
-      message +=
-        `🔖 Sipariş No: ${orderNumber}\n\n`;
-    }
-
-    message +=
-      `👤 Ad Soyad: ${name}\n`;
-
-    message +=
-      `📞 Telefon: ${phone}\n\n`;
-
-    message +=
-      "📍 ALINACAK ADRES\n";
-
-    message +=
-      `${pickup}\n\n`;
-
-    message +=
-      "🏁 TESLİM EDİLECEK ADRES\n";
-
-    message +=
-      `${delivery}\n\n`;
-
-    message +=
-      "📦 PAKET BİLGİLERİ\n";
-
-    if (packageType) {
-
-      message +=
-        `Paket Türü: ${packageType}\n`;
-
-    } else {
-
-      message +=
-        "Paket Türü: Belirtilmedi\n";
-    }
-
-    message +=
-      `⚡ Aciliyet: ${urgency}\n`;
-
-    if (description) {
-
-      message +=
-        `📝 Açıklama: ${description}\n`;
-    }
-
-    if (note) {
-
-      message +=
-        `💬 Ek Not: ${note}\n`;
-    }
-
-    message += "\n";
-
-    message +=
-      "━━━━━━━━━━━━━━━━━━━━\n";
-
-    message +=
-      "Bu talep Bursa Hızlı Teslimat web sitesinden oluşturulmuştur.";
-
-    return message;
-  }
-
-  /* ============================================================
-     TELEFON NUMARASI FORMATLAMA
-     ============================================================ */
-
-  function initPhoneFormatting() {
-
-    const phoneInput =
-      $("#phone");
-
-    if (!phoneInput) {
-      return;
-    }
-
-    phoneInput.addEventListener(
-      "input",
-      () => {
-
-        let value =
-          phoneInput.value;
-
-        value =
-          value.replace(
-            /\D/g,
-            ""
-          );
-
-        if (
-          value.startsWith("90") &&
-          value.length > 10
-        ) {
-
-          value =
-            "0" +
-            value.substring(2);
-        }
-
-        if (
-          value.length === 10 &&
-          !value.startsWith("0")
-        ) {
-
-          value =
-            "0" +
-            value;
-        }
-
-        value =
-          value.substring(0, 11);
-
-        phoneInput.value =
-          formatTurkishPhone(
-            value
-          );
-      }
-    );
-  }
-
-  /* ============================================================
-     TELEFON FORMAT
-     ============================================================ */
-
-  function formatTurkishPhone(value) {
-
-    const digits =
-      String(value || "")
-        .replace(/\D/g, "");
-
-    if (digits.length <= 4) {
-      return digits;
-    }
-
-    if (digits.length <= 7) {
-
-      return (
-        `${digits.substring(0, 4)} ` +
-        `${digits.substring(4)}`
-      );
-    }
-
-    if (digits.length <= 9) {
-
-      return (
-        `${digits.substring(0, 4)} ` +
-        `${digits.substring(4, 7)} ` +
-        `${digits.substring(7)}`
-      );
-    }
-
-    return (
-      `${digits.substring(0, 4)} ` +
-      `${digits.substring(4, 7)} ` +
-      `${digits.substring(7, 9)} ` +
-      `${digits.substring(9, 11)}`
-    );
-  }
-
-  /* ============================================================
-     TELEFON DOĞRULAMA
-     ============================================================ */
-
-  function isValidTurkishPhone(phone) {
-
-    const digits =
-      String(phone || "")
-        .replace(/\D/g, "");
-
-    return /^05\d{9}$/.test(
-      digits
-    );
-  }
-
-  /* ============================================================
-     FORM MESAJLARI
-     ============================================================ */
-
-  function showFormMessage(
-    message,
-    type = "success"
-  ) {
-
-    const box =
-      $("#formMessage");
-
-    if (!box) {
-      return;
-    }
-
-    box.textContent =
-      message;
-
-    box.classList.remove(
-      "success",
-      "error",
-      "show"
-    );
-
-    box.classList.add(
-      type
-    );
-
-    requestAnimationFrame(() => {
-
-      box.classList.add(
-        "show"
-      );
-    });
-  }
-
-  function clearFormMessage() {
-
-    const box =
-      $("#formMessage");
-
-    if (!box) {
-      return;
-    }
-
-    box.textContent = "";
-
-    box.classList.remove(
-      "success",
-      "error",
-      "show"
-    );
-  }
-
-  /* ============================================================
-     ALANA ODAKLAN
-     ============================================================ */
-
-  function focusField(
-    selector
-  ) {
-
-    const field =
-      $(selector);
-
-    if (!field) {
-      return;
-    }
-
-    field.focus();
-
-    setTimeout(() => {
-
-      field.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
+        });
       });
-
-    }, 50);
   }
 
   /* ============================================================
      HEADER SCROLL
      ============================================================ */
 
-  function initHeaderScroll() {
-
+  function setupHeader() {
     const header =
-      $(".site-header");
+      document.querySelector(".site-header");
 
     if (!header) {
       return;
     }
 
-    const updateHeader =
-      () => {
-
-        if (
-          window.scrollY > 20
-        ) {
-
-          header.classList.add(
-            "scrolled"
-          );
-
-        } else {
-
-          header.classList.remove(
-            "scrolled"
-          );
-        }
-      };
-
-    updateHeader();
+    const updateHeader = () => {
+      if (window.scrollY > 20) {
+        header.style.boxShadow =
+          "0 10px 35px rgba(0,0,0,.22)";
+      } else {
+        header.style.boxShadow = "";
+      }
+    };
 
     window.addEventListener(
       "scroll",
       updateHeader,
-      {
-        passive: true
-      }
+      { passive: true }
     );
+
+    updateHeader();
   }
 
   /* ============================================================
-     GÖRÜNÜR OLMA ANİMASYONLARI
+     BASİT REVEAL ANİMASYONU
      ============================================================ */
 
-  function initRevealAnimations() {
-
-    const elements = [
-
-      ...$$(".step-card"),
-
-      ...$$(".service-card"),
-
-      ...$$(".contact-card"),
-
-      ...$$(".quick-item"),
-
-      ...$$(".hero-feature"),
-
-      ...$$(".delivery-intro"),
-
-      ...$$(".form-card")
-    ];
+  function setupReveal() {
+    const elements = document.querySelectorAll(
+      ".step-card, .service-card, .contact-card, .quick-item, .hero-card"
+    );
 
     if (!elements.length) {
       return;
     }
 
-    if (
-      !(
-        "IntersectionObserver"
-        in window
-      )
-    ) {
-
-      elements.forEach(
-        (element) => {
-
-          element.classList.add(
-            "visible"
-          );
-        }
-      );
-
+    if (!("IntersectionObserver" in window)) {
       return;
     }
 
     const observer =
       new IntersectionObserver(
-        (entries, obs) => {
-
-          entries.forEach(
-            (entry) => {
-
-              if (
-                !entry.isIntersecting
-              ) {
-                return;
-              }
-
-              entry.target.classList.add(
-                "visible"
-              );
-
-              obs.unobserve(
-                entry.target
-              );
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+              return;
             }
-          );
+
+            entry.target.style.opacity = "1";
+            entry.target.style.transform =
+              "translateY(0)";
+
+            observer.unobserve(
+              entry.target
+            );
+          });
         },
         {
-          threshold: 0.12
+          threshold: 0.08
         }
       );
 
-    elements.forEach(
-      (element) => {
+    elements.forEach((element) => {
+      element.style.opacity = "0";
+      element.style.transform =
+        "translateY(16px)";
+      element.style.transition =
+        "opacity .55s ease, transform .55s ease";
 
-        observer.observe(
-          element
-        );
-      }
-    );
+      observer.observe(element);
+    });
   }
 
   /* ============================================================
-     TELEFON / WHATSAPP LİNKLERİ
+     BAŞLAT
      ============================================================ */
 
-  function initContactLinks() {
+  function init() {
+    setupDeliveryForm();
+    setupPhoneFormatting();
+    setupContactLinks();
+    setupSmoothScroll();
+    setupHeader();
+    setupReveal();
 
-    const whatsappLinks =
-      $$(
-        'a[href*="wa.me"]'
-      );
-
-    whatsappLinks.forEach(
-      (link) => {
-
-        link.addEventListener(
-          "click",
-          () => {}
-        );
-      }
-    );
-
-    const phoneLinks =
-      $$(
-        'a[href^="tel:"]'
-      );
-
-    phoneLinks.forEach(
-      (link) => {
-
-        link.addEventListener(
-          "click",
-          () => {}
-        );
-      }
+    console.log(
+      "🚚 Bursa Hızlı Teslimat sistemi hazır."
     );
   }
 
   /* ============================================================
-     GLOBAL FONKSİYONLAR
+     GLOBAL API
      ============================================================ */
 
   window.BursaHizliTeslimat = {
-
     buildWhatsAppMessage,
-
     isValidTurkishPhone,
-
     formatTurkishPhone,
-
-    getSupabase: () => supabase
+    generateOrderNumber,
+    getSupabase: () => supabase,
+    openWhatsApp
   };
+
+  /* ============================================================
+     DOM READY
+     ============================================================ */
+
+  if (
+    document.readyState === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      init
+    );
+  } else {
+    init();
+  }
 
 })();
