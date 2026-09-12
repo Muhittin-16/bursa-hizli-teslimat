@@ -314,8 +314,6 @@ button{
     color:#ff9b9b;
 }
 
-/* SES AKTİF UYARISI */
-
 .header-button.sound-ready{
     border-color:rgba(25,195,125,.45);
     color:#83f0be;
@@ -435,7 +433,11 @@ button{
     margin-bottom:17px;
     border-radius:15px;
     background:
-        linear-gradient(135deg,rgba(25,195,125,.16),rgba(53,167,255,.10));
+        linear-gradient(
+            135deg,
+            rgba(25,195,125,.16),
+            rgba(53,167,255,.10)
+        );
     border:1px solid rgba(25,195,125,.35);
     animation:alertPulse 1.3s ease infinite alternate;
 }
@@ -527,7 +529,7 @@ button{
 
 .order-info label{
     display:block;
-    margin-bottom:4px;
+    margin-bottom:5px;
     color:#71859b;
     font-size:10px;
     font-weight:800;
@@ -540,32 +542,98 @@ button{
     word-break:break-word;
 }
 
-.price-row{
-    display:flex;
-    gap:8px;
-    margin-top:15px;
-}
+/* =========================================================
+   HİZMET BÖLGESİ
+   ========================================================= */
 
-.price-row input{
-    flex:1;
-    min-width:0;
-    height:43px;
-    padding:0 12px;
-    color:white;
-    background:#071522;
-    border:1px solid var(--border);
-    border-radius:9px;
-    outline:none;
-}
-
-.price-row button{
-    border:0;
-    padding:0 15px;
-    border-radius:9px;
-    color:#04110b;
-    background:var(--primary);
+.region-value{
+    color:#83f0be!important;
     font-weight:800;
 }
+
+/* =========================================================
+   FİYAT
+   ========================================================= */
+
+.price-display{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-top:15px;
+    padding:15px 17px;
+    border-radius:13px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(25,195,125,.10),
+            rgba(53,167,255,.07)
+        );
+    border:1px solid rgba(25,195,125,.22);
+}
+
+.price-display-left{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.price-icon{
+    width:40px;
+    height:40px;
+    display:grid;
+    place-items:center;
+    border-radius:11px;
+    background:rgba(25,195,125,.12);
+    font-size:20px;
+}
+
+.price-display-label{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    margin-bottom:3px;
+}
+
+.price-display strong{
+    font-size:20px;
+    color:#83f0be;
+}
+
+.price-auto{
+    color:#6ec7ff;
+    font-size:10px;
+    font-weight:800;
+}
+
+/* =========================================================
+   TELEFON
+   ========================================================= */
+
+.phone-action{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin-top:8px;
+    padding:7px 10px;
+    border-radius:8px;
+    text-decoration:none;
+    color:#83f0be;
+    background:rgba(25,195,125,.08);
+    border:1px solid rgba(25,195,125,.20);
+    font-size:11px;
+    font-weight:800;
+}
+
+.phone-action:hover{
+    background:rgba(25,195,125,.15);
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
 
 .order-actions{
     display:flex;
@@ -697,6 +765,12 @@ button{
     .status-button{
         width:100%;
     }
+
+    .price-display{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
 }
 
 @media(max-width:480px){
@@ -726,13 +800,14 @@ button{
         flex-direction:column;
     }
 
-    .price-row{
-        flex-direction:column;
+    .price-display{
+        padding:13px;
     }
 
-    .price-row button{
-        min-height:43px;
+    .price-display strong{
+        font-size:18px;
     }
+
 }
 
 </style>
@@ -1165,7 +1240,7 @@ let titleFlashTimer = null;
 
 
 /* =========================================================
-   SES BUTONU DURUMU
+   SES BUTONU
    ========================================================= */
 
 function updateSoundButton(){
@@ -1269,10 +1344,6 @@ async function unlockAudio(){
 
         if(!AudioContextClass){
 
-            console.warn(
-                "Bu tarayıcı Web Audio API desteklemiyor."
-            );
-
             return false;
         }
 
@@ -1291,15 +1362,6 @@ async function unlockAudio(){
             await audioContext.resume();
 
         }
-
-        /*
-         * Chrome/Edge bazı durumlarda AudioContext'i
-         * kullanıcı etkileşimi olmadan çalıştırmaz.
-         *
-         * Buradaki çok kısa ve neredeyse sessiz
-         * oscillator kullanıcı tıklaması sırasında
-         * ses motorunu gerçekten uyandırır.
-         */
 
         const oscillator =
             audioContext.createOscillator();
@@ -1375,15 +1437,6 @@ async function unlockAudio(){
 
 async function login(){
 
-    /*
-     * ÖNEMLİ:
-     * Kullanıcının gerçek tıklaması sırasında
-     * ses sistemini açıyoruz.
-     *
-     * Böylece girişten sonra yeni sipariş
-     * geldiğinde tarayıcı sesi engellemez.
-     */
-
     if(soundEnabled){
 
         await unlockAudio();
@@ -1443,11 +1496,6 @@ async function login(){
                 "Bu hesap yönetici yetkisine sahip değil."
             );
         }
-
-        /*
-         * Login butonu kullanıcı etkileşimi olduğu için
-         * ses burada zaten açılmış olur.
-         */
 
         if(soundEnabled){
 
@@ -1585,7 +1633,7 @@ passwordToggle.addEventListener(
 
 
 /* =========================================================
-   TEK TON
+   SES
    ========================================================= */
 
 function playTone(
@@ -1654,10 +1702,6 @@ function playTone(
 }
 
 
-/* =========================================================
-   YENİ SİPARİŞ SESİ
-   ========================================================= */
-
 function playNewOrderSound(){
 
     if(!soundEnabled){
@@ -1669,10 +1713,6 @@ function playNewOrderSound(){
         !audioContext ||
         !audioUnlocked
     ){
-
-        console.warn(
-            "Yeni sipariş sesi için ses sistemi aktif değil."
-        );
 
         return;
     }
@@ -1687,10 +1727,6 @@ function playNewOrderSound(){
 
     const now =
         audioContext.currentTime + 0.03;
-
-    /*
-     * Belirgin 5 aşamalı teslimat zili.
-     */
 
     playTone(
         784,
@@ -1732,10 +1768,6 @@ function playNewOrderSound(){
         "sine"
     );
 
-    /*
-     * İkinci kısa zil.
-     */
-
     playTone(
         659,
         now + 1.35,
@@ -1753,10 +1785,6 @@ function playNewOrderSound(){
     );
 }
 
-
-/* =========================================================
-   TEST SESİ
-   ========================================================= */
 
 function playTestSound(){
 
@@ -1805,11 +1833,6 @@ soundBtn.addEventListener(
     "click",
     async () => {
 
-        /*
-         * SES KAPALIYSA:
-         * kullanıcı tıklamasıyla tekrar aç.
-         */
-
         if(!soundEnabled){
 
             soundEnabled = true;
@@ -1833,11 +1856,6 @@ soundBtn.addEventListener(
             return;
         }
 
-        /*
-         * SES AÇIK AMA HENÜZ TARAYICIYA
-         * TANITILMAMIŞSA:
-         */
-
         if(!audioUnlocked){
 
             const unlocked =
@@ -1853,10 +1871,6 @@ soundBtn.addEventListener(
 
             return;
         }
-
-        /*
-         * SES AÇIKSA KAPAT.
-         */
 
         soundEnabled = false;
 
@@ -1907,10 +1921,6 @@ async function requestNotifications(){
     updateNotificationButton();
 }
 
-
-/* =========================================================
-   BİLDİRİM BUTONU DURUMU
-   ========================================================= */
 
 function updateNotificationButton(){
 
@@ -2140,24 +2150,12 @@ function showNewOrderAlert(){
         "show"
     );
 
-    /*
-     * Ses
-     */
     playNewOrderSound();
 
-    /*
-     * Tarayıcı bildirimi
-     */
     notifyNewOrder();
 
-    /*
-     * Telefon/tablet titreşimi
-     */
     vibrateForNewOrder();
 
-    /*
-     * Tarayıcı sekmesinde uyarı
-     */
     flashBrowserTitle();
 }
 
@@ -2202,7 +2200,6 @@ async function loadOrders(){
             "Siparişler yüklenemedi.";
 
         return;
-
     }
 
     allOrders =
@@ -2212,13 +2209,6 @@ async function loadOrders(){
         allOrders.map(
             order => order.id
         );
-
-    /*
-     * İlk yüklemede ses çalmıyor.
-     *
-     * Sonraki kontrollerde daha önce görülmeyen
-     * sipariş varsa yeni sipariş olarak kabul ediliyor.
-     */
 
     if(
         !firstOrderLoad
@@ -2331,6 +2321,36 @@ function statusLabel(status){
 
 
 /* =========================================================
+   BÖLGE İSMİ
+   ========================================================= */
+
+function regionLabel(region){
+
+    const regions = {
+
+        yildirim:
+            "Yıldırım",
+
+        osmangazi:
+            "Osmangazi",
+
+        nilufer:
+            "Nilüfer",
+
+        gursu:
+            "Gürsu",
+
+        kestel:
+            "Kestel"
+
+    };
+
+    return regions[region] ||
+        "Belirtilmedi";
+}
+
+
+/* =========================================================
    TARİH
    ========================================================= */
 
@@ -2386,6 +2406,21 @@ function escapeHtml(value){
             "'",
             "&#039;"
         );
+}
+
+
+/* =========================================================
+   TELEFON NUMARASINI LINK İÇİN TEMİZLE
+   ========================================================= */
+
+function phoneHref(phone){
+
+    return String(
+        phone ?? ""
+    ).replace(
+        /[^0-9+]/g,
+        ""
+    );
 }
 
 
@@ -2451,6 +2486,17 @@ function createOrderCard(order){
         order.aciliyet ||
         "normal";
 
+    const price =
+        Number(order.fiyat);
+
+    const priceText =
+        Number.isFinite(price)
+            ? `${price.toLocaleString("tr-TR")} ₺`
+            : "Fiyat oluşturulmadı";
+
+    const phone =
+        phoneHref(order.telefon);
+
     return `
         <article
             class="order-card"
@@ -2512,6 +2558,38 @@ function createOrderCard(order){
                         ${escapeHtml(
                             order.telefon
                         )}
+
+                        ${
+                            phone
+                                ? `
+                                    <br>
+                                    <a
+                                        class="phone-action"
+                                        href="tel:${escapeHtml(phone)}"
+                                    >
+                                        📞 Ara
+                                    </a>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <div class="order-info">
+
+                    <label>
+                        Hizmet Bölgesi
+                    </label>
+
+                    <div class="region-value">
+                        🏍️ ${escapeHtml(
+                            regionLabel(
+                                order.hizmet_bolgesi
+                            )
+                        )}
                     </div>
 
                 </div>
@@ -2543,7 +2621,7 @@ function createOrderCard(order){
                         ${
                             urgency === "acil"
                                 ? "⚡ Acil"
-                                : "Normal"
+                                : "🕒 Normal"
                         }
                     </div>
 
@@ -2614,27 +2692,33 @@ function createOrderCard(order){
             </div>
 
 
-            <div class="price-row">
+            <!-- OTOMATİK FİYAT -->
 
-                <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="order-price"
-                    data-id="${escapeHtml(order.id)}"
-                    value="${
-                        order.fiyat ?? ""
-                    }"
-                    placeholder="Teslimat fiyatı ₺"
-                >
+            <div class="price-display">
 
-                <button
-                    type="button"
-                    class="save-price"
-                    data-id="${escapeHtml(order.id)}"
-                >
-                    💰 Fiyat Kaydet
-                </button>
+                <div class="price-display-left">
+
+                    <div class="price-icon">
+                        💰
+                    </div>
+
+                    <div>
+
+                        <span class="price-display-label">
+                            Teslimat Ücreti
+                        </span>
+
+                        <strong>
+                            ${escapeHtml(priceText)}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                <span class="price-auto">
+                    OTOMATİK FİYAT
+                </span>
 
             </div>
 
@@ -2642,6 +2726,7 @@ function createOrderCard(order){
             <div class="order-actions">
 
                 <button
+                    type="button"
                     class="status-button green status-action"
                     data-id="${escapeHtml(order.id)}"
                     data-status="onaylandi"
@@ -2650,6 +2735,7 @@ function createOrderCard(order){
                 </button>
 
                 <button
+                    type="button"
                     class="status-button status-action"
                     data-id="${escapeHtml(order.id)}"
                     data-status="kurye_atandi"
@@ -2658,6 +2744,7 @@ function createOrderCard(order){
                 </button>
 
                 <button
+                    type="button"
                     class="status-button status-action"
                     data-id="${escapeHtml(order.id)}"
                     data-status="yolda"
@@ -2666,6 +2753,7 @@ function createOrderCard(order){
                 </button>
 
                 <button
+                    type="button"
                     class="status-button green status-action"
                     data-id="${escapeHtml(order.id)}"
                     data-status="teslim_edildi"
@@ -2674,6 +2762,7 @@ function createOrderCard(order){
                 </button>
 
                 <button
+                    type="button"
                     class="status-button red status-action"
                     data-id="${escapeHtml(order.id)}"
                     data-status="iptal"
@@ -2711,43 +2800,11 @@ function attachOrderEvents(){
                         const status =
                             button.dataset.status;
 
+                        button.disabled = true;
+
                         await updateOrderStatus(
                             id,
                             status
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".save-price"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    async () => {
-
-                        const id =
-                            button.dataset.id;
-
-                        const input =
-                            document.querySelector(
-                                `.order-price[data-id="${id}"]`
-                            );
-
-                        const value =
-                            input?.value;
-
-                        await updateOrderPrice(
-                            id,
-                            value
                         );
 
                     }
@@ -2784,66 +2841,6 @@ async function updateOrderStatus(
 
         alert(
             "Sipariş durumu güncellenemedi."
-        );
-
-        return;
-    }
-
-    await loadOrders();
-}
-
-
-/* =========================================================
-   FİYAT GÜNCELLE
-   ========================================================= */
-
-async function updateOrderPrice(
-    id,
-    value
-){
-
-    let price = null;
-
-    if(
-        value !== "" &&
-        value !== null &&
-        value !== undefined
-    ){
-
-        price =
-            Number(value);
-
-        if(
-            Number.isNaN(price) ||
-            price < 0
-        ){
-
-            alert(
-                "Geçerli bir fiyat girin."
-            );
-
-            return;
-        }
-
-    }
-
-    const { error } =
-        await supabase
-            .from("teslimat_talepleri")
-            .update({
-                fiyat:price
-            })
-            .eq(
-                "id",
-                id
-            );
-
-    if(error){
-
-        console.error(error);
-
-        alert(
-            "Fiyat kaydedilemedi."
         );
 
         return;
@@ -3070,15 +3067,6 @@ async function checkExistingSession(){
 
         return;
     }
-
-    /*
-     * Eğer oturum zaten açıksa tarayıcı ses için
-     * yeni kullanıcı tıklaması isteyebilir.
-     *
-     * Bu nedenle panel açılır ve kullanıcıdan
-     * sadece bir kez "Sesi Etkinleştir" düğmesine
-     * basması beklenir.
-     */
 
     showAdminPanel();
 
