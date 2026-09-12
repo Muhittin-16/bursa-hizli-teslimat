@@ -1,6 +1,6 @@
 /* ============================================================
    BURSA HIZLI TESLİMAT
-   WHATSAPP TESLİMAT TALEP SİSTEMİ
+   TESLİMAT TALEBİ + WHATSAPP SİSTEMİ
    ============================================================ */
 
 (() => {
@@ -14,7 +14,7 @@
   const STORAGE_KEY = "bursaHizliTeslimatTalepleri";
 
   /* ============================================================
-     ELEMENTLER
+     FORM
      ============================================================ */
 
   const deliveryForm = document.getElementById("deliveryForm");
@@ -26,7 +26,7 @@
   }
 
   /* ============================================================
-     SİPARİŞ NUMARASI
+     TALEP NUMARASI
      ============================================================ */
 
   function generateOrderNumber() {
@@ -42,30 +42,30 @@
   }
 
   /* ============================================================
-     FORM VERİLERİNİ AL
+     FORM BİLGİLERİNİ AL
      ============================================================ */
 
   function getFormData() {
-    const formData = new FormData(deliveryForm);
+    const data = new FormData(deliveryForm);
 
     return {
       id: generateOrderNumber(),
 
-      name: (formData.get("name") || "").trim(),
+      name: (data.get("name") || "").trim(),
 
-      phone: (formData.get("phone") || "").trim(),
+      phone: (data.get("phone") || "").trim(),
 
-      pickup: (formData.get("pickup") || "").trim(),
+      pickup: (data.get("pickup") || "").trim(),
 
-      delivery: (formData.get("delivery") || "").trim(),
+      delivery: (data.get("delivery") || "").trim(),
 
-      packageType: (formData.get("packageType") || "").trim(),
+      packageType: (data.get("packageType") || "").trim(),
 
-      urgency: (formData.get("urgency") || "").trim(),
+      urgency: (data.get("urgency") || "Normal").trim(),
 
-      description: (formData.get("description") || "").trim(),
+      description: (data.get("description") || "").trim(),
 
-      note: (formData.get("note") || "").trim(),
+      note: (data.get("note") || "").trim(),
 
       status: "Yeni",
 
@@ -74,19 +74,19 @@
   }
 
   /* ============================================================
-     LOCAL STORAGE'A KAYDET
+     LOCAL STORAGE
      ============================================================ */
 
   function saveRequest(request) {
     try {
-      const oldRequests =
+      const requests =
         JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-      oldRequests.push(request);
+      requests.push(request);
 
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(oldRequests)
+        JSON.stringify(requests)
       );
 
       return true;
@@ -110,9 +110,11 @@
     formMessage.style.display = "block";
 
     if (type === "error") {
-      formMessage.style.borderColor = "rgba(255,98,98,.45)";
+      formMessage.style.borderColor =
+        "rgba(255,98,98,.45)";
     } else {
-      formMessage.style.borderColor = "rgba(25,195,125,.45)";
+      formMessage.style.borderColor =
+        "rgba(25,195,125,.45)";
     }
   }
 
@@ -120,207 +122,297 @@
     if (!formMessage) return;
 
     formMessage.textContent = "";
+
     formMessage.classList.remove("show");
+
     formMessage.style.display = "none";
   }
 
   /* ============================================================
-     WHATSAPP MESAJI OLUŞTUR
+     WHATSAPP MESAJI
+     
+     Bilerek Türkçe karakter ve emoji kullanmıyoruz.
+     Böylece WhatsApp'ta � karakteri oluşmaz.
      ============================================================ */
 
   function createWhatsAppMessage(request) {
     const message = `
-🏍️ BURSA HIZLI TESLİMAT
-📦 YENİ TESLİMAT TALEBİ
+BURSA HIZLI TESLIMAT
+YENI TESLIMAT TALEBI
 
-━━━━━━━━━━━━━━━━━━
+==============================
 
-🔢 Talep No:
+Talep No:
 ${request.id}
 
-👤 Müşteri:
+Musteri:
 ${request.name}
 
-📞 Telefon:
+Telefon:
 ${request.phone}
 
-📍 Alınacak Adres:
+Alinacak Adres:
 ${request.pickup}
 
-📍 Teslim Edilecek Adres:
+Teslim Edilecek Adres:
 ${request.delivery}
 
-📦 Paket Türü:
+Paket Turu:
 ${request.packageType || "Belirtilmedi"}
 
-⚡ Teslimat Önceliği:
+Teslimat Onceligi:
 ${request.urgency || "Normal"}
 
-📝 Açıklama:
+Paket Aciklamasi:
 ${request.description || "Belirtilmedi"}
 
-📌 Not:
+Ek Not:
 ${request.note || "Yok"}
 
-━━━━━━━━━━━━━━━━━━
+==============================
 
-🚀 Bursa Hızlı Teslimat
+Bursa Hizli Teslimat
 `;
 
     return message.trim();
   }
 
   /* ============================================================
-     WHATSAPP'I AÇ
+     WHATSAPP AÇ
      ============================================================ */
 
   function openWhatsApp(request) {
     const message = createWhatsAppMessage(request);
 
     const whatsappUrl =
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      "https://wa.me/" +
+      WHATSAPP_NUMBER +
+      "?text=" +
+      encodeURIComponent(message);
 
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    window.open(
+      whatsappUrl,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   /* ============================================================
-     TELEFON NUMARASI DÜZENLE
+     TELEFON NUMARASI
      ============================================================ */
 
-  const phoneInput = deliveryForm.querySelector("#phone");
+  const phoneInput =
+    deliveryForm.querySelector("#phone");
 
   if (phoneInput) {
-    phoneInput.addEventListener("input", function () {
-      let value = this.value.replace(/\D/g, "");
 
-      if (value.length > 0 && value.charAt(0) !== "0") {
+    phoneInput.addEventListener("input", function () {
+
+      let value =
+        this.value.replace(/\D/g, "");
+
+      if (
+        value.length > 0 &&
+        value.charAt(0) !== "0"
+      ) {
         value = "0" + value;
       }
 
       value = value.substring(0, 11);
 
       this.value = value;
+
     });
+
   }
 
   /* ============================================================
      FORM GÖNDERME
      ============================================================ */
 
-  deliveryForm.addEventListener("submit", function (event) {
-    event.preventDefault();
+  deliveryForm.addEventListener(
+    "submit",
+    function (event) {
 
-    hideMessage();
+      event.preventDefault();
 
-    const request = getFormData();
+      hideMessage();
 
-    /* ----------------------------------------------------------
-       ZORUNLU ALAN KONTROLLERİ
-       ---------------------------------------------------------- */
+      const request = getFormData();
 
-    if (!request.name) {
-      showMessage("Lütfen adınızı ve soyadınızı yazın.", "error");
-      return;
-    }
+      /* --------------------------------------------------------
+         AD SOYAD
+         -------------------------------------------------------- */
 
-    if (!request.phone) {
-      showMessage("Lütfen telefon numaranızı yazın.", "error");
-      return;
-    }
+      if (!request.name) {
 
-    if (request.phone.length < 10) {
-      showMessage("Lütfen geçerli bir telefon numarası yazın.", "error");
-      return;
-    }
+        showMessage(
+          "Lutfen adinizi ve soyadinizi yazin.",
+          "error"
+        );
 
-    if (!request.pickup) {
-      showMessage("Lütfen paketin alınacağı adresi yazın.", "error");
-      return;
-    }
+        return;
+      }
 
-    if (!request.delivery) {
-      showMessage("Lütfen teslimat adresini yazın.", "error");
-      return;
-    }
+      /* --------------------------------------------------------
+         TELEFON
+         -------------------------------------------------------- */
 
-    /* ----------------------------------------------------------
-       TALEBİ KAYDET
-       ---------------------------------------------------------- */
+      if (!request.phone) {
 
-    saveRequest(request);
+        showMessage(
+          "Lutfen telefon numaranizi yazin.",
+          "error"
+        );
 
-    /* ----------------------------------------------------------
-       KULLANICIYA BİLGİ VER
-       ---------------------------------------------------------- */
+        return;
+      }
 
-    showMessage(
-      `✅ Talebiniz hazırlandı. Talep No: ${request.id} — WhatsApp açılıyor...`,
-      "success"
-    );
+      if (request.phone.length < 10) {
 
-    /* ----------------------------------------------------------
-       WHATSAPP'I AÇ
-       ---------------------------------------------------------- */
+        showMessage(
+          "Lutfen gecerli bir telefon numarasi yazin.",
+          "error"
+        );
 
-    setTimeout(() => {
-      openWhatsApp(request);
-    }, 500);
+        return;
+      }
 
-    /* ----------------------------------------------------------
-       FORMU TEMİZLE
-       ---------------------------------------------------------- */
+      /* --------------------------------------------------------
+         ALINACAK ADRES
+         -------------------------------------------------------- */
 
-    setTimeout(() => {
-      deliveryForm.reset();
-    }, 1000);
+      if (!request.pickup) {
 
-    /* ----------------------------------------------------------
-       MESAJI GÖSTER
-       ---------------------------------------------------------- */
+        showMessage(
+          "Lutfen paketin alinacagi adresi yazin.",
+          "error"
+        );
 
-    if (formMessage) {
+        return;
+      }
+
+      /* --------------------------------------------------------
+         TESLIM ADRESI
+         -------------------------------------------------------- */
+
+      if (!request.delivery) {
+
+        showMessage(
+          "Lutfen teslimat adresini yazin.",
+          "error"
+        );
+
+        return;
+      }
+
+      /* --------------------------------------------------------
+         KAYDET
+         -------------------------------------------------------- */
+
+      saveRequest(request);
+
+      /* --------------------------------------------------------
+         BASARILI MESAJ
+         -------------------------------------------------------- */
+
+      showMessage(
+        "Talebiniz hazirlandi. Talep No: " +
+        request.id +
+        " - WhatsApp aciliyor..."
+      );
+
+      /* --------------------------------------------------------
+         WHATSAPP
+         -------------------------------------------------------- */
+
       setTimeout(() => {
-        formMessage.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
+
+        openWhatsApp(request);
+
+      }, 500);
+
+      /* --------------------------------------------------------
+         FORMU TEMIZLE
+         -------------------------------------------------------- */
+
+      setTimeout(() => {
+
+        deliveryForm.reset();
+
+      }, 1000);
+
+      /* --------------------------------------------------------
+         MESAJ ALANINA KAYDIR
+         -------------------------------------------------------- */
+
+      setTimeout(() => {
+
+        if (formMessage) {
+
+          formMessage.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+        }
+
       }, 100);
+
     }
-  });
+  );
 
   /* ============================================================
      SAYFA İÇİ YUMUŞAK KAYDIRMA
      ============================================================ */
 
-  document.querySelectorAll('a[href^="#"]').forEach((link) => {
-    link.addEventListener("click", function (event) {
-      const targetId = this.getAttribute("href");
+  document
+    .querySelectorAll('a[href^="#"]')
+    .forEach((link) => {
 
-      if (!targetId || targetId === "#") return;
+      link.addEventListener(
+        "click",
+        function (event) {
 
-      const target = document.querySelector(targetId);
+          const targetId =
+            this.getAttribute("href");
 
-      if (!target) return;
+          if (
+            !targetId ||
+            targetId === "#"
+          ) {
+            return;
+          }
 
-      event.preventDefault();
+          const target =
+            document.querySelector(targetId);
 
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+          if (!target) {
+            return;
+          }
+
+          event.preventDefault();
+
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+
+        }
+      );
+
     });
-  });
 
   /* ============================================================
      SİSTEM HAZIR
      ============================================================ */
 
   console.log(
-    "🏍️ Bursa Hızlı Teslimat sistemi hazır."
+    "Bursa Hizli Teslimat sistemi hazir."
   );
 
   console.log(
-    "📱 WhatsApp teslimat numarası:",
+    "WhatsApp:",
     WHATSAPP_NUMBER
   );
 
