@@ -1,281 +1,327 @@
-/* =========================================================
+/* ============================================================
    BURSA HIZLI TESLİMAT
-   script.js
-   Ön yüz form işlemleri
-   ========================================================= */
+   WHATSAPP TESLİMAT TALEP SİSTEMİ
+   ============================================================ */
 
 (() => {
-    "use strict";
+  "use strict";
 
-    // ---------------------------------------------------------
-    // FORM ELEMANLARI
-    // ---------------------------------------------------------
+  /* ============================================================
+     AYARLAR
+     ============================================================ */
 
-    const deliveryForm = document.getElementById("deliveryForm");
-    const formMessage = document.getElementById("formMessage");
+  const WHATSAPP_NUMBER = "905539497449";
+  const STORAGE_KEY = "bursaHizliTeslimatTalepleri";
 
-    // Form sayfada yoksa kodu çalıştırmadan çık
-    if (!deliveryForm) {
-        return;
+  /* ============================================================
+     ELEMENTLER
+     ============================================================ */
+
+  const deliveryForm = document.getElementById("deliveryForm");
+  const formMessage = document.getElementById("formMessage");
+
+  if (!deliveryForm) {
+    console.warn("Teslimat formu bulunamadı.");
+    return;
+  }
+
+  /* ============================================================
+     SİPARİŞ NUMARASI
+     ============================================================ */
+
+  function generateOrderNumber() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+
+    const random = Math.floor(1000 + Math.random() * 9000);
+
+    return `BHT-${year}${month}${day}-${random}`;
+  }
+
+  /* ============================================================
+     FORM VERİLERİNİ AL
+     ============================================================ */
+
+  function getFormData() {
+    const formData = new FormData(deliveryForm);
+
+    return {
+      id: generateOrderNumber(),
+
+      name: (formData.get("name") || "").trim(),
+
+      phone: (formData.get("phone") || "").trim(),
+
+      pickup: (formData.get("pickup") || "").trim(),
+
+      delivery: (formData.get("delivery") || "").trim(),
+
+      packageType: (formData.get("packageType") || "").trim(),
+
+      urgency: (formData.get("urgency") || "").trim(),
+
+      description: (formData.get("description") || "").trim(),
+
+      note: (formData.get("note") || "").trim(),
+
+      status: "Yeni",
+
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  /* ============================================================
+     LOCAL STORAGE'A KAYDET
+     ============================================================ */
+
+  function saveRequest(request) {
+    try {
+      const oldRequests =
+        JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+      oldRequests.push(request);
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(oldRequests)
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Talep kaydedilemedi:", error);
+      return false;
     }
+  }
 
-    // ---------------------------------------------------------
-    // YARDIMCI FONKSİYONLAR
-    // ---------------------------------------------------------
+  /* ============================================================
+     MESAJ GÖSTER
+     ============================================================ */
 
-    function generateOrderNumber() {
-        const now = new Date();
+  function showMessage(message, type = "success") {
+    if (!formMessage) return;
 
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
+    formMessage.textContent = message;
 
-        const randomNumber = Math.floor(1000 + Math.random() * 9000);
+    formMessage.classList.add("show");
 
-        return `BHT-${year}${month}${day}-${randomNumber}`;
+    formMessage.style.display = "block";
+
+    if (type === "error") {
+      formMessage.style.borderColor = "rgba(255,98,98,.45)";
+    } else {
+      formMessage.style.borderColor = "rgba(25,195,125,.45)";
     }
+  }
 
-    function getFormData() {
-        return {
-            id: generateOrderNumber(),
+  function hideMessage() {
+    if (!formMessage) return;
 
-            name: document.getElementById("name")?.value.trim() || "",
+    formMessage.textContent = "";
+    formMessage.classList.remove("show");
+    formMessage.style.display = "none";
+  }
 
-            phone: document.getElementById("phone")?.value.trim() || "",
+  /* ============================================================
+     WHATSAPP MESAJI OLUŞTUR
+     ============================================================ */
 
-            pickup: document.getElementById("pickup")?.value.trim() || "",
+  function createWhatsAppMessage(request) {
+    const message = `
+🏍️ BURSA HIZLI TESLİMAT
+📦 YENİ TESLİMAT TALEBİ
 
-            delivery: document.getElementById("delivery")?.value.trim() || "",
+━━━━━━━━━━━━━━━━━━
 
-            packageType: document.getElementById("packageType")?.value || "",
+🔢 Talep No:
+${request.id}
 
-            urgency: document.getElementById("urgency")?.value || "",
+👤 Müşteri:
+${request.name}
 
-            description:
-                document.getElementById("description")?.value.trim() || "",
+📞 Telefon:
+${request.phone}
 
-            note:
-                document.getElementById("note")?.value.trim() || "",
+📍 Alınacak Adres:
+${request.pickup}
 
-            status: "Yeni",
+📍 Teslim Edilecek Adres:
+${request.delivery}
 
-            createdAt: new Date().toISOString()
-        };
-    }
+📦 Paket Türü:
+${request.packageType || "Belirtilmedi"}
 
-    function saveRequest(request) {
-        const storageKey = "bursaHizliTeslimatTalepleri";
+⚡ Teslimat Önceliği:
+${request.urgency || "Normal"}
 
-        let requests = [];
+📝 Açıklama:
+${request.description || "Belirtilmedi"}
 
-        try {
-            const saved = localStorage.getItem(storageKey);
+📌 Not:
+${request.note || "Yok"}
 
-            if (saved) {
-                requests = JSON.parse(saved);
+━━━━━━━━━━━━━━━━━━
 
-                if (!Array.isArray(requests)) {
-                    requests = [];
-                }
-            }
-        } catch (error) {
-            requests = [];
-        }
+🚀 Bursa Hızlı Teslimat
+`;
 
-        requests.push(request);
+    return message.trim();
+  }
 
-        try {
-            localStorage.setItem(
-                storageKey,
-                JSON.stringify(requests)
-            );
-        } catch (error) {
-            console.warn(
-                "Talep tarayıcı hafızasına kaydedilemedi.",
-                error
-            );
-        }
-    }
+  /* ============================================================
+     WHATSAPP'I AÇ
+     ============================================================ */
 
-    function showMessage(message, type = "success") {
-        if (!formMessage) {
-            return;
-        }
+  function openWhatsApp(request) {
+    const message = createWhatsAppMessage(request);
 
-        formMessage.textContent = message;
+    const whatsappUrl =
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
-        formMessage.classList.remove(
-            "success",
-            "error"
-        );
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  }
 
-        formMessage.classList.add(type);
+  /* ============================================================
+     TELEFON NUMARASI DÜZENLE
+     ============================================================ */
 
-        formMessage.style.display = "block";
-    }
+  const phoneInput = deliveryForm.querySelector("#phone");
 
-    function hideMessage() {
-        if (!formMessage) {
-            return;
-        }
+  if (phoneInput) {
+    phoneInput.addEventListener("input", function () {
+      let value = this.value.replace(/\D/g, "");
 
-        formMessage.textContent = "";
-        formMessage.style.display = "none";
+      if (value.length > 0 && value.charAt(0) !== "0") {
+        value = "0" + value;
+      }
 
-        formMessage.classList.remove(
-            "success",
-            "error"
-        );
-    }
+      value = value.substring(0, 11);
 
-    // ---------------------------------------------------------
-    // TELEFON NUMARASI KONTROLÜ
-    // ---------------------------------------------------------
-
-    const phoneInput = document.getElementById("phone");
-
-    if (phoneInput) {
-        phoneInput.addEventListener("input", () => {
-            let value = phoneInput.value;
-
-            // Rakam dışındaki karakterleri temizle
-            value = value.replace(/\D/g, "");
-
-            // Türkiye başındaki 0 olmadan girilmişse
-            // kullanıcıya kolaylık sağlamak için 0 ekleme
-            if (value.length > 0 && value.charAt(0) !== "0") {
-                value = "0" + value;
-            }
-
-            // En fazla 11 rakam
-            value = value.substring(0, 11);
-
-            phoneInput.value = value;
-        });
-    }
-
-    // ---------------------------------------------------------
-    // FORM GÖNDERME
-    // ---------------------------------------------------------
-
-    deliveryForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        hideMessage();
-
-        const request = getFormData();
-
-        // -----------------------------------------------------
-        // ZORUNLU ALAN KONTROLLERİ
-        // -----------------------------------------------------
-
-        if (!request.name) {
-            showMessage(
-                "Lütfen adınızı ve soyadınızı yazın.",
-                "error"
-            );
-            document.getElementById("name")?.focus();
-            return;
-        }
-
-        if (!request.phone) {
-            showMessage(
-                "Lütfen telefon numaranızı yazın.",
-                "error"
-            );
-            document.getElementById("phone")?.focus();
-            return;
-        }
-
-        if (request.phone.length < 10) {
-            showMessage(
-                "Lütfen geçerli bir telefon numarası girin.",
-                "error"
-            );
-            document.getElementById("phone")?.focus();
-            return;
-        }
-
-        if (!request.pickup) {
-            showMessage(
-                "Lütfen alınacak adresi yazın.",
-                "error"
-            );
-            document.getElementById("pickup")?.focus();
-            return;
-        }
-
-        if (!request.delivery) {
-            showMessage(
-                "Lütfen teslim edilecek adresi yazın.",
-                "error"
-            );
-            document.getElementById("delivery")?.focus();
-            return;
-        }
-
-        // -----------------------------------------------------
-        // TALEBİ KAYDET
-        // -----------------------------------------------------
-
-        saveRequest(request);
-
-        // -----------------------------------------------------
-        // BAŞARI MESAJI
-        // -----------------------------------------------------
-
-        showMessage(
-            `Talebiniz başarıyla alındı! Talep numaranız: ${request.id}. En kısa sürede sizinle iletişime geçeceğiz.`,
-            "success"
-        );
-
-        // Formu temizle
-        deliveryForm.reset();
-
-        // Başarı mesajına doğru kaydır
-        if (formMessage) {
-            setTimeout(() => {
-                formMessage.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-            }, 100);
-        }
+      this.value = value;
     });
+  }
 
-    // ---------------------------------------------------------
-    // SAYFA İÇİ MENÜLER
-    // ---------------------------------------------------------
+  /* ============================================================
+     FORM GÖNDERME
+     ============================================================ */
 
-    document.querySelectorAll('a[href^="#"]').forEach((link) => {
-        link.addEventListener("click", (event) => {
-            const targetId = link.getAttribute("href");
+  deliveryForm.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-            if (!targetId || targetId === "#") {
-                return;
-            }
+    hideMessage();
 
-            const target = document.querySelector(targetId);
+    const request = getFormData();
 
-            if (!target) {
-                return;
-            }
+    /* ----------------------------------------------------------
+       ZORUNLU ALAN KONTROLLERİ
+       ---------------------------------------------------------- */
 
-            event.preventDefault();
+    if (!request.name) {
+      showMessage("Lütfen adınızı ve soyadınızı yazın.", "error");
+      return;
+    }
 
-            target.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-        });
-    });
+    if (!request.phone) {
+      showMessage("Lütfen telefon numaranızı yazın.", "error");
+      return;
+    }
 
-    // ---------------------------------------------------------
-    // SAYFA YÜKLENDİ
-    // ---------------------------------------------------------
+    if (request.phone.length < 10) {
+      showMessage("Lütfen geçerli bir telefon numarası yazın.", "error");
+      return;
+    }
 
-    console.log(
-        "Bursa Hızlı Teslimat sistemi hazır."
+    if (!request.pickup) {
+      showMessage("Lütfen paketin alınacağı adresi yazın.", "error");
+      return;
+    }
+
+    if (!request.delivery) {
+      showMessage("Lütfen teslimat adresini yazın.", "error");
+      return;
+    }
+
+    /* ----------------------------------------------------------
+       TALEBİ KAYDET
+       ---------------------------------------------------------- */
+
+    saveRequest(request);
+
+    /* ----------------------------------------------------------
+       KULLANICIYA BİLGİ VER
+       ---------------------------------------------------------- */
+
+    showMessage(
+      `✅ Talebiniz hazırlandı. Talep No: ${request.id} — WhatsApp açılıyor...`,
+      "success"
     );
+
+    /* ----------------------------------------------------------
+       WHATSAPP'I AÇ
+       ---------------------------------------------------------- */
+
+    setTimeout(() => {
+      openWhatsApp(request);
+    }, 500);
+
+    /* ----------------------------------------------------------
+       FORMU TEMİZLE
+       ---------------------------------------------------------- */
+
+    setTimeout(() => {
+      deliveryForm.reset();
+    }, 1000);
+
+    /* ----------------------------------------------------------
+       MESAJI GÖSTER
+       ---------------------------------------------------------- */
+
+    if (formMessage) {
+      setTimeout(() => {
+        formMessage.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }, 100);
+    }
+  });
+
+  /* ============================================================
+     SAYFA İÇİ YUMUŞAK KAYDIRMA
+     ============================================================ */
+
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", function (event) {
+      const targetId = this.getAttribute("href");
+
+      if (!targetId || targetId === "#") return;
+
+      const target = document.querySelector(targetId);
+
+      if (!target) return;
+
+      event.preventDefault();
+
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  });
+
+  /* ============================================================
+     SİSTEM HAZIR
+     ============================================================ */
+
+  console.log(
+    "🏍️ Bursa Hızlı Teslimat sistemi hazır."
+  );
+
+  console.log(
+    "📱 WhatsApp teslimat numarası:",
+    WHATSAPP_NUMBER
+  );
 
 })();
